@@ -1,0 +1,12 @@
+WIDTH=16;
+DEPTH=2048;
+
+ADDRESS_RADIX=HEX;
+DATA_RADIX=HEX;
+
+CONTENT BEGIN
+0000: BAAA; --     LOADI Number
+0001: 9870; --     OUT ExtMem
+0002: 2802; --         JUMP loop
+[0003..07FF] : 0000; -- [empty memory]
+END;
