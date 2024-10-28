@@ -10,6 +10,7 @@
 *.jdi
 *.jpg
 *.qsf
+**/*.qsf
 *.mif
 *.pin
 *.pof
