@@ -9,7 +9,8 @@
 *.html
 *.jdi
 *.jpg
-# *.mif
+*.qsf
+*.mif
 *.pin
 *.pof
 *.ptf.*
