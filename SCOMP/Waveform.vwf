@@ -1,8 +1,8 @@
 /*<simulation_settings>
-<ftestbench_cmd>quartus_eda --gen_testbench --tool=modelsim_oem --format=vhdl --write_settings_files=off SCOMP -c SCOMP --vector_source="C:/Users/pserb/github/gatech/ece2031/09-lab/SCOMP/Waveform.vwf" --testbench_file="C:/Users/pserb/github/gatech/ece2031/09-lab/SCOMP/simulation/qsim/Waveform.vwf.vht"</ftestbench_cmd>
-<ttestbench_cmd>quartus_eda --gen_testbench --tool=modelsim_oem --format=vhdl --write_settings_files=off SCOMP -c SCOMP --vector_source="C:/Users/pserb/github/gatech/ece2031/09-lab/SCOMP/Waveform.vwf" --testbench_file="C:/Users/pserb/github/gatech/ece2031/09-lab/SCOMP/simulation/qsim/Waveform.vwf.vht"</ttestbench_cmd>
-<fnetlist_cmd>quartus_eda --write_settings_files=off --simulation --functional=on --flatten_buses=off --tool=modelsim_oem --format=vhdl --output_directory="C:/Users/pserb/github/gatech/ece2031/09-lab/SCOMP/simulation/qsim/" SCOMP -c SCOMP</fnetlist_cmd>
-<tnetlist_cmd>quartus_eda --write_settings_files=off --simulation --functional=off --flatten_buses=off --timescale=1ps --tool=modelsim_oem --format=vhdl --output_directory="C:/Users/pserb/github/gatech/ece2031/09-lab/SCOMP/simulation/qsim/" SCOMP -c SCOMP</tnetlist_cmd>
+<ftestbench_cmd>quartus_eda --gen_testbench --tool=modelsim_oem --format=vhdl --write_settings_files=off SCOMP -c SCOMP --vector_source="C:/Users/pserb/Desktop/SCOMP/Waveform.vwf" --testbench_file="C:/Users/pserb/Desktop/SCOMP/simulation/qsim/Waveform.vwf.vht"</ftestbench_cmd>
+<ttestbench_cmd>quartus_eda --gen_testbench --tool=modelsim_oem --format=vhdl --write_settings_files=off SCOMP -c SCOMP --vector_source="C:/Users/pserb/Desktop/SCOMP/Waveform.vwf" --testbench_file="C:/Users/pserb/Desktop/SCOMP/simulation/qsim/Waveform.vwf.vht"</ttestbench_cmd>
+<fnetlist_cmd>quartus_eda --write_settings_files=off --simulation --functional=on --flatten_buses=off --tool=modelsim_oem --format=vhdl --output_directory="C:/Users/pserb/Desktop/SCOMP/simulation/qsim/" SCOMP -c SCOMP</fnetlist_cmd>
+<tnetlist_cmd>quartus_eda --write_settings_files=off --simulation --functional=off --flatten_buses=off --timescale=1ps --tool=modelsim_oem --format=vhdl --output_directory="C:/Users/pserb/Desktop/SCOMP/simulation/qsim/" SCOMP -c SCOMP</tnetlist_cmd>
 <modelsim_script>onerror {exit -code 1}
 vlib work
 vcom -work work SCOMP.vho
@@ -18,8 +18,12 @@ proc simTimestamp {} {
     }
 }
 after 2500 simTimestamp
-run 10000 ns
+run 10000ns
 quit -f
+
+
+
+
 </modelsim_script>
 <modelsim_script_timing>onerror {exit -code 1}
 vlib work
@@ -38,6 +42,10 @@ proc simTimestamp {} {
 after 2500 simTimestamp
 run -all
 quit -f
+
+
+
+
 </modelsim_script_timing>
 <hdl_lang>vhdl</hdl_lang>
 </simulation_settings>*/

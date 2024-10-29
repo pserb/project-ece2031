@@ -6,12 +6,7 @@
 *.done
 *.eqn
 *.hex
-*.html
 *.jdi
-*.jpg
-*.qsf
-**/*.qsf
-*.mif
 *.pin
 *.pof
 *.ptf.*
