@@ -106,22 +106,22 @@ BEGIN
 				state <= idle;
             wren <= '0';
         ELSIF rising_edge(CLOCK) THEN
-            IF EXTMEMADDR_EN = '1' THEN
+            IF EXTMEMADDR_EN = '1' AND state = idle THEN
                 address <= IO_DATA;
             END IF;
 
-            IF EXTMEMDATA_EN = '1' THEN
+            IF EXTMEMDATA_EN = '1' AND state = idle THEN
                 data_in <= IO_DATA;
                 wren <= '1';
             ELSE
                 wren <= '0';
             END IF;
 				
-				IF EXTMEMCONFIG_EN = '1' THEN
+				IF EXTMEMCONFIG_EN = '1' AND state = idle THEN
 					config <= IO_DATA;
 				END IF;
 				
-				IF EXTMEMERR_EN = '1' AND IO_WRITE = '1' THEN
+				IF EXTMEMERR_EN = '1' AND IO_WRITE = '1' AND state = idle THEN
 					err <= (OTHERS => '0');
 				END IF;
         END IF;
