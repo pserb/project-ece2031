@@ -76,7 +76,7 @@ Beginning:
     OUT Hex0
     ; CALL Delay
 
-    ; should be 0xFF
+    ; should be 0xFFFF
     IN MemErr
     OUT Hex0
     ; CALL Delay
@@ -96,7 +96,7 @@ Beginning:
     LOADI &H6F
     OUT MemConfig
 
-    ; should be 0xFF
+    ; should be 0x1
     OUT MemData
     IN MemErr
     OUT Hex0

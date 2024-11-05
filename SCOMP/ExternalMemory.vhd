@@ -160,7 +160,7 @@ BEGIN
 					state <= idle;
 					address <= address + inc_val;
 					IF inc_val > (X"FFFF" - address) THEN
-						err <= X"00FF";
+						err <= X"0001";
 					END IF;
 				END IF;
 				
@@ -168,7 +168,7 @@ BEGIN
 					state <= idle;
 					address <= address - inc_val;
 					IF inc_val > address THEN
-						err <= X"00FF";
+						err <= X"FFFF";
 					END IF;
 				END IF;
         END IF;
