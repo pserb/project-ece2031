@@ -34,8 +34,16 @@ ARCHITECTURE a OF ExternalMemory IS
 	 SIGNAL config : STD_LOGIC_VECTOR(15 DOWNTO 0);
     SIGNAL wren : STD_LOGIC;
 	 
+	 SIGNAL write_inc_en : STD_LOGIC;
+	 SIGNAL read_inc_en : STD_LOGIC;
+	 SIGNAL write_inc_dir : STD_LOGIC;
+	 SIGNAL read_inc_dir : STD_LOGIC;
+	 SIGNAL inc_val : STD_LOGIC_VECTOR(15 DOWNTO 0);
+	 
 	 type state_type is (
-		idle
+		idle,
+		incrementing,
+		decrementing
 	 );
 	 SIGNAL state : state_type;
 BEGIN
@@ -95,6 +103,13 @@ BEGIN
         enabledt => NOT IO_WRITE AND EXTMEMERR_EN,
         tridata => IO_DATA
     );
+	 
+	 inc_val(2 DOWNTO 0) <= config(2 DOWNTO 0);
+	 inc_val(15 DOWNTO 3) <= (OTHERS => '0');
+	 write_inc_en <= config(6);
+	 read_inc_en <= config(5);
+	 write_inc_dir <= config(4);
+	 read_inc_dir <= config(3);
 
     PROCESS (CLOCK, RESETN)
     BEGIN
@@ -113,6 +128,22 @@ BEGIN
             IF EXTMEMDATA_EN = '1' AND state = idle THEN
                 data_in <= IO_DATA;
                 wren <= '1';
+					 
+					 IF write_inc_en = '1' AND IO_WRITE = '1' THEN
+						IF write_inc_dir = '1' THEN
+							state <= decrementing;
+						ELSE
+							state <= incrementing;
+						END IF;
+					 END IF;
+					 
+					 IF read_inc_en = '1' AND IO_WRITE = '0' THEN
+						IF read_inc_dir = '1' THEN
+							state <= decrementing;
+						ELSE
+							state <= incrementing;
+						END IF;
+					 END IF;
             ELSE
                 wren <= '0';
             END IF;
@@ -123,6 +154,22 @@ BEGIN
 				
 				IF EXTMEMERR_EN = '1' AND IO_WRITE = '1' AND state = idle THEN
 					err <= (OTHERS => '0');
+				END IF;
+				
+				IF state = incrementing THEN
+					state <= idle;
+					address <= address + inc_val;
+					IF inc_val > (X"FFFF" - address) THEN
+						err <= X"00FF";
+					END IF;
+				END IF;
+				
+				IF state = decrementing THEN
+					state <= idle;
+					address <= address - inc_val;
+					IF inc_val > address THEN
+						err <= X"00FF";
+					END IF;
 				END IF;
         END IF;
     END PROCESS;

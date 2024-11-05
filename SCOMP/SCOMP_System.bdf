@@ -1393,6 +1393,11 @@ https://fpgasoftware.intel.com/eula.
 	(pt 1168 392)
 )
 (connector
+	(text "EXTMEMERR_EN" (rect 1074 392 1156 409)(font "Intel Clear" ))
+	(pt 1064 408)
+	(pt 1168 408)
+)
+(connector
 	(pt 544 936)
 	(pt 552 936)
 	(bus)
@@ -1402,11 +1407,6 @@ https://fpgasoftware.intel.com/eula.
 	(pt 552 936)
 	(pt 680 936)
 	(bus)
-)
-(connector
-	(text "EXTMEMERR_EN" (rect 1074 392 1156 409)(font "Intel Clear" ))
-	(pt 1064 408)
-	(pt 1168 408)
 )
 (junction (pt 536 280))
 (junction (pt 552 936))
@@ -1427,7 +1427,7 @@ https://fpgasoftware.intel.com/eula.
 	(section (rect 0 48 368 72)(text "DESIGNER" (rect 2 0 59 12)(font "Arial" ))(text "Kevin Johnson, Tom Collins" (rect 56 2 286 20)(font "Arial" (font_size 12)))(border))
 	(section (rect 0 72 280 96)(text "NUMBER" (rect 2 0 49 12)(font "Arial" ))(text "1.00" (rect 56 1 85 17)(font "Arial" (font_size 10)))(border))
 	(section (rect 280 72 368 96)(text "REV" (rect 2 1 25 13)(font "Arial" ))(text "B" (rect 43 1 53 17)(font "Arial" (font_size 10)))(border))
-	(section (rect 0 96 240 120)(text "DATE" (rect 2 0 30 12)(font "Arial" ))(text "Tue Nov 05 12:52:09 2024" (rect 56 3 233 19)(font "Arial" (font_size 10)))(date)(border))
+	(section (rect 0 96 240 120)(text "DATE" (rect 2 0 30 12)(font "Arial" ))(text "Tue Nov 05 14:45:04 2024" (rect 56 3 233 19)(font "Arial" (font_size 10)))(date)(border))
 	(section (rect 240 96 310 120)(text "SHEET" (rect 2 0 37 12)(font "Arial" ))(text "1" (rect 55 5 63 21)(font "Arial" (font_size 10))))
 	(section (rect 310 96 368 120)(text "OF" (rect 10 0 25 12)(font "Arial" ))(text "1" (rect 34 4 42 20)(font "Arial" (font_size 10))))
 	(drawing

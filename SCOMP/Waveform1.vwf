@@ -1,8 +1,8 @@
 /*<simulation_settings>
-<ftestbench_cmd>quartus_eda --gen_testbench --tool=modelsim_oem --format=vhdl --write_settings_files=off SCOMP -c SCOMP --vector_source="C:/Users/pserb/github/project-ece2031/SCOMP/Waveform1.vwf" --testbench_file="C:/Users/pserb/github/project-ece2031/SCOMP/simulation/qsim/Waveform1.vwf.vht"</ftestbench_cmd>
-<ttestbench_cmd>quartus_eda --gen_testbench --tool=modelsim_oem --format=vhdl --write_settings_files=off SCOMP -c SCOMP --vector_source="C:/Users/pserb/github/project-ece2031/SCOMP/Waveform1.vwf" --testbench_file="C:/Users/pserb/github/project-ece2031/SCOMP/simulation/qsim/Waveform1.vwf.vht"</ttestbench_cmd>
-<fnetlist_cmd>quartus_eda --write_settings_files=off --simulation --functional=on --flatten_buses=off --tool=modelsim_oem --format=vhdl --output_directory="C:/Users/pserb/github/project-ece2031/SCOMP/simulation/qsim/" SCOMP -c SCOMP</fnetlist_cmd>
-<tnetlist_cmd>quartus_eda --write_settings_files=off --simulation --functional=off --flatten_buses=off --timescale=1ps --tool=modelsim_oem --format=vhdl --output_directory="C:/Users/pserb/github/project-ece2031/SCOMP/simulation/qsim/" SCOMP -c SCOMP</tnetlist_cmd>
+<ftestbench_cmd>quartus_eda --gen_testbench --tool=modelsim_oem --format=vhdl --write_settings_files=off SCOMP -c SCOMP --vector_source="C:/Users/alari/mastuff/gt_stuff/ece2031/project/project-ece2031/SCOMP/Waveform1.vwf" --testbench_file="C:/Users/alari/mastuff/gt_stuff/ece2031/project/project-ece2031/SCOMP/simulation/qsim/Waveform1.vwf.vht"</ftestbench_cmd>
+<ttestbench_cmd>quartus_eda --gen_testbench --tool=modelsim_oem --format=vhdl --write_settings_files=off SCOMP -c SCOMP --vector_source="C:/Users/alari/mastuff/gt_stuff/ece2031/project/project-ece2031/SCOMP/Waveform1.vwf" --testbench_file="C:/Users/alari/mastuff/gt_stuff/ece2031/project/project-ece2031/SCOMP/simulation/qsim/Waveform1.vwf.vht"</ttestbench_cmd>
+<fnetlist_cmd>quartus_eda --write_settings_files=off --simulation --functional=on --flatten_buses=off --tool=modelsim_oem --format=vhdl --output_directory="C:/Users/alari/mastuff/gt_stuff/ece2031/project/project-ece2031/SCOMP/simulation/qsim/" SCOMP -c SCOMP</fnetlist_cmd>
+<tnetlist_cmd>quartus_eda --write_settings_files=off --simulation --functional=off --flatten_buses=off --timescale=1ps --tool=modelsim_oem --format=vhdl --output_directory="C:/Users/alari/mastuff/gt_stuff/ece2031/project/project-ece2031/SCOMP/simulation/qsim/" SCOMP -c SCOMP</tnetlist_cmd>
 <modelsim_script>onerror {exit -code 1}
 vlib work
 vcom -work work SCOMP.vho
@@ -18,7 +18,7 @@ proc simTimestamp {} {
     }
 }
 after 2500 simTimestamp
-run 50000 ns
+run 30 us
 quit -f
 
 </modelsim_script>
