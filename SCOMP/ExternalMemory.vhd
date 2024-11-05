@@ -19,6 +19,8 @@ ENTITY ExternalMemory IS
         CLOCK,
         EXTMEMADDR_EN,
         EXTMEMDATA_EN,
+		  EXTMEMCONFIG_EN,
+		  EXTMEMERR_EN,
         IO_WRITE : IN STD_LOGIC;
         IO_DATA : INOUT STD_LOGIC_VECTOR(15 DOWNTO 0)
     );
@@ -28,7 +30,14 @@ ARCHITECTURE a OF ExternalMemory IS
     SIGNAL address : STD_LOGIC_VECTOR(15 DOWNTO 0);
     SIGNAL data_in : STD_LOGIC_VECTOR(15 DOWNTO 0);
     SIGNAL data_out : STD_LOGIC_VECTOR(15 DOWNTO 0);
+	 SIGNAL err : STD_LOGIC_VECTOR(15 DOWNTO 0);
+	 SIGNAL config : STD_LOGIC_VECTOR(15 DOWNTO 0);
     SIGNAL wren : STD_LOGIC;
+	 
+	 type state_type is (
+		idle
+	 );
+	 SIGNAL state : state_type;
 BEGIN
     -- use altsyncram component for memory
     -- the way this works is if EXTMEMADDR_EN is high, then the memory is being addressed
@@ -55,13 +64,35 @@ BEGIN
     );
 
     -- Use Intel LPM IP to create tristate drivers
-    IO_BUS : lpm_bustri
+    IO_BUS_DATA : lpm_bustri
     GENERIC MAP(
         lpm_width => 16
     )
     PORT MAP(
         data => data_out,
-        enabledt => NOT IO_WRITE,
+        enabledt => NOT IO_WRITE AND EXTMEMDATA_EN,
+        tridata => IO_DATA
+    );
+	 
+	 -- Use Intel LPM IP to create tristate drivers
+    IO_BUS_CONFIG : lpm_bustri
+    GENERIC MAP(
+        lpm_width => 16
+    )
+    PORT MAP(
+        data => config,
+        enabledt => NOT IO_WRITE AND EXTMEMCONFIG_EN,
+        tridata => IO_DATA
+    );
+	 
+	 -- Use Intel LPM IP to create tristate drivers
+    IO_BUS_ERR : lpm_bustri
+    GENERIC MAP(
+        lpm_width => 16
+    )
+    PORT MAP(
+        data => err,
+        enabledt => NOT IO_WRITE AND EXTMEMERR_EN,
         tridata => IO_DATA
     );
 
@@ -70,6 +101,9 @@ BEGIN
         IF RESETN = '0' THEN
             address <= (OTHERS => '0');
             data_in <= (OTHERS => '0');
+				err <= (OTHERS => '0');
+				config <= (OTHERS => '0');
+				state <= idle;
             wren <= '0';
         ELSIF rising_edge(CLOCK) THEN
             IF EXTMEMADDR_EN = '1' THEN
@@ -82,6 +116,14 @@ BEGIN
             ELSE
                 wren <= '0';
             END IF;
+				
+				IF EXTMEMCONFIG_EN = '1' THEN
+					config <= IO_DATA;
+				END IF;
+				
+				IF EXTMEMERR_EN = '1' AND IO_WRITE = '1' THEN
+					err <= (OTHERS => '0');
+				END IF;
         END IF;
     END PROCESS;
 
