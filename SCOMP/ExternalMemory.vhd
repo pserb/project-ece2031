@@ -93,7 +93,7 @@ BEGIN
     -- that means that IO_DATA stores the address
     -- if EXTMEMDATA_EN is high, then the memory is being written to
     -- that means that IO_DATA stores the data to be written
-    memory_component : altsyncram
+    bounds_memory_component : altsyncram
     GENERIC MAP(
         operation_mode => "DUAL_PORT",
         width_a => 16,
@@ -104,7 +104,7 @@ BEGIN
         widthad_b => 16,
         numwords_b => 2 ** 16,
         outdata_reg_b => "UNREGISTERED",
-        init_file => "ExternalMemory.mif",
+        init_file => "ExternalMemoryBounds.mif",
         read_during_write_mode_port_a => "NEW_DATA_NO_NBE_READ",
         intended_device_family => "MAX 10"
     )
@@ -114,10 +114,10 @@ BEGIN
         data_a => bound_in_a,
         wren_a => wren_bound_a,
         q_a => bound_out_a,
-		  address_a => id_b,
-        data_a => bound_in_b,
-        wren_a => wren_bound_b,
-        q_a => bound_out_b
+		  address_b => id_b,
+        data_b => bound_in_b,
+        wren_b => wren_bound_b,
+        q_b => bound_out_b
     );
 
     -- Use Intel LPM IP to create tristate drivers
@@ -170,10 +170,13 @@ BEGIN
 				state <= idle;
             wren <= '0';
 				
-				id <= (OTHERS => '0');
-            bound_in <= (OTHERS => '0');
+				id_a <= (OTHERS => '0');
+            bound_in_a <= (OTHERS => '0');
+				wren_bound_a <= '0';
+				id_b <= (OTHERS => '0');
+            bound_in_b <= (OTHERS => '0');
+				wren_bound_b <= '0';
 				bounds_state <= idle;
-            wren_bound <= '0';
         ELSIF rising_edge(CLOCK) THEN
             IF EXTMEMADDR_EN = '1' AND state = idle THEN
                 address <= IO_DATA;
@@ -185,17 +188,30 @@ BEGIN
 				
 				IF EXTMEMBOUNDS_EN = '1' AND state = idle THEN
 					IF bounds_state = idle THEN
-						bounds_state <= check_lower;
-						id_a <= IF id = 0 THEN id ELSE id - 1;
-						id_b <= IF id = 16#FFFF# THEN id ELSE id + 1;
+						bounds_state <= check;
+						IF id = X"0000" THEN
+							id_a <= id;
+						ELSE
+							id_a <= id - 1;
+						END IF;
+						
+						IF id = X"FFFF" THEN
+							id_b <= id;
+						ELSE
+							id_b <= id + 1;
+						END IF;
 					ELSIF bounds_state = check
 						AND (bound_out_a <  IO_DATA OR IO_DATA = bound_out_a)
 						AND (bound_out_b > IO_DATA OR IO_DATA = bound_out_b) THEN
 						bounds_state <= idle;
-						id_a <= IF id = 0 THEN id ELSE id - 1;
+						IF id = X"0000" THEN
+							id_a <= id;
+						ELSE
+							id_a <= id - 1;
+						END IF;
 						id_b <= id;
-						bound_in_b <= IO_DATA
-						wren_bound_b = '1';
+						bound_in_b <= IO_DATA;
+						wren_bound_b <= '1';
 					ELSE
 						err <= X"0002";
 						bounds_state <= idle;
