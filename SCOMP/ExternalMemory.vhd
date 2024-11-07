@@ -95,7 +95,7 @@ BEGIN
     -- that means that IO_DATA stores the data to be written
     bounds_memory_component : altsyncram
     GENERIC MAP(
-        operation_mode => "DUAL_PORT",
+        operation_mode => "BIDIR_DUAL_PORT",
         width_a => 16,
         widthad_a => 16,
         numwords_a => 2 ** 16,
@@ -110,6 +110,7 @@ BEGIN
     )
     PORT MAP(
         clock0 => CLOCK,
+		  clock1 => CLOCK,
         address_a => id_a,
         data_a => bound_in_a,
         wren_a => wren_bound_a,
@@ -201,17 +202,23 @@ BEGIN
 							id_b <= id + 1;
 						END IF;
 					ELSIF bounds_state = check
-						AND (bound_out_a <  IO_DATA OR IO_DATA = bound_out_a)
-						AND (bound_out_b > IO_DATA OR IO_DATA = bound_out_b) THEN
+						AND (bound_out_a < IO_DATA OR IO_DATA = bound_out_a)
+						and not (bound_out_a = X"0000")
+						AND (bound_out_b > IO_DATA OR IO_DATA = bound_out_b OR bound_out_b = X"0000") THEN
 						bounds_state <= idle;
 						IF id = X"0000" THEN
 							id_a <= id;
 						ELSE
 							id_a <= id - 1;
 						END IF;
-						id_b <= id;
-						bound_in_b <= IO_DATA;
-						wren_bound_b <= '1';
+						
+						IF IO_DATA = x"0000" THEN
+							bound_in_b <= bound_in_a;
+						ELSE
+							bound_in_b <= IO_DATA;
+						END IF;
+							id_b <= id;
+							wren_bound_b <= '1';
 					ELSE
 						err <= X"0002";
 						bounds_state <= idle;
@@ -219,7 +226,7 @@ BEGIN
 				END IF;
 
             IF EXTMEMDATA_EN = '1' AND state = idle THEN
-					IF (address < bound_out_b OR address = bound_out_b) AND bound_out_a < address THEN
+					IF bound_out_b = X"0000" OR (address < bound_out_b AND (bound_out_a < address or address = bound_out_a or id_a = x"0000")) THEN
 					 data_in <= IO_DATA;
 					 wren <= '1';
 					 
