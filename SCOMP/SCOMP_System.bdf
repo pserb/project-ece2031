@@ -894,7 +894,7 @@ https://fpgasoftware.intel.com/eula.
 	)
 )
 (symbol
-	(rect 280 904 552 1080)
+	(rect 272 904 544 1080)
 	(text "ExternalMemory" (rect 5 0 85 12)(font "Arial" ))
 	(text "inst6" (rect 8 160 31 172)(font "Arial" ))
 	(port
@@ -1272,26 +1272,6 @@ https://fpgasoftware.intel.com/eula.
 	(bus)
 )
 (connector
-	(text "EXTMEMADDR_EN" (rect 194 952 284 969)(font "Intel Clear" ))
-	(pt 184 968)
-	(pt 280 968)
-)
-(connector
-	(text "clk_12MHz" (rect 194 936 247 953)(font "Intel Clear" ))
-	(pt 184 952)
-	(pt 280 952)
-)
-(connector
-	(text "resetn" (rect 194 920 223 937)(font "Intel Clear" ))
-	(pt 184 936)
-	(pt 280 936)
-)
-(connector
-	(text "EXTMEMDATA_EN" (rect 194 968 283 985)(font "Intel Clear" ))
-	(pt 184 984)
-	(pt 280 984)
-)
-(connector
 	(text "segments[13..0]" (rect 1058 616 1133 633)(font "Intel Clear" ))
 	(pt 1136 632)
 	(pt 1048 632)
@@ -1373,21 +1353,6 @@ https://fpgasoftware.intel.com/eula.
 	(pt 1168 376)
 )
 (connector
-	(text "EXTMEMCONFIG_EN" (rect 194 984 294 1001)(font "Intel Clear" ))
-	(pt 184 1000)
-	(pt 280 1000)
-)
-(connector
-	(text "EXTMEMERR_EN" (rect 194 1000 276 1017)(font "Intel Clear" ))
-	(pt 280 1016)
-	(pt 184 1016)
-)
-(connector
-	(text "IO_WRITE" (rect 194 1016 242 1033)(font "Intel Clear" ))
-	(pt 280 1032)
-	(pt 184 1032)
-)
-(connector
 	(text "EXTMEMCONFIG_EN" (rect 1074 376 1174 393)(font "Intel Clear" ))
 	(pt 1064 392)
 	(pt 1168 392)
@@ -1398,18 +1363,52 @@ https://fpgasoftware.intel.com/eula.
 	(pt 1168 408)
 )
 (connector
+	(text "EXTMEMADDR_EN" (rect 186 952 276 969)(font "Intel Clear" ))
+	(pt 176 968)
+	(pt 272 968)
+)
+(connector
+	(text "clk_12MHz" (rect 186 936 239 953)(font "Intel Clear" ))
+	(pt 176 952)
+	(pt 272 952)
+)
+(connector
+	(text "resetn" (rect 186 920 215 937)(font "Intel Clear" ))
+	(pt 176 936)
+	(pt 272 936)
+)
+(connector
+	(text "EXTMEMDATA_EN" (rect 186 968 275 985)(font "Intel Clear" ))
+	(pt 176 984)
+	(pt 272 984)
+)
+(connector
+	(text "EXTMEMCONFIG_EN" (rect 186 984 286 1001)(font "Intel Clear" ))
+	(pt 176 1000)
+	(pt 272 1000)
+)
+(connector
+	(text "EXTMEMERR_EN" (rect 186 1000 268 1017)(font "Intel Clear" ))
+	(pt 272 1016)
+	(pt 176 1016)
+)
+(connector
+	(text "IO_WRITE" (rect 186 1016 234 1033)(font "Intel Clear" ))
+	(pt 272 1032)
+	(pt 176 1032)
+)
+(connector
+	(pt 536 936)
 	(pt 544 936)
-	(pt 552 936)
 	(bus)
 )
 (connector
-	(text "IO_DATA[15..0]" (rect 594 920 667 937)(font "Intel Clear" ))
-	(pt 552 936)
-	(pt 680 936)
+	(text "IO_DATA[15..0]" (rect 586 920 659 937)(font "Intel Clear" ))
+	(pt 544 936)
+	(pt 672 936)
 	(bus)
 )
 (junction (pt 536 280))
-(junction (pt 552 936))
 (junction (pt 1064 344))
 (junction (pt 1064 328))
 (junction (pt 1064 312))
@@ -1417,6 +1416,7 @@ https://fpgasoftware.intel.com/eula.
 (junction (pt 1064 296))
 (junction (pt 1064 360))
 (junction (pt 1064 376))
+(junction (pt 544 936))
 (text "The daughterboard test points." (rect 1272 1096 1454 1115)(font "Intel Clear" (font_size 8)))
 (text "Can be useful for testing using the oscilloscope." (rect 1272 1120 1549 1139)(font "Intel Clear" (font_size 8)))
 (text "Convenient place to put your new peripheral (some relevant wires have been placed for you)." (rect 192 840 738 859)(font "Intel Clear" (font_size 8)))
@@ -1427,7 +1427,7 @@ https://fpgasoftware.intel.com/eula.
 	(section (rect 0 48 368 72)(text "DESIGNER" (rect 2 0 59 12)(font "Arial" ))(text "Kevin Johnson, Tom Collins" (rect 56 2 286 20)(font "Arial" (font_size 12)))(border))
 	(section (rect 0 72 280 96)(text "NUMBER" (rect 2 0 49 12)(font "Arial" ))(text "1.00" (rect 56 1 85 17)(font "Arial" (font_size 10)))(border))
 	(section (rect 280 72 368 96)(text "REV" (rect 2 1 25 13)(font "Arial" ))(text "B" (rect 43 1 53 17)(font "Arial" (font_size 10)))(border))
-	(section (rect 0 96 240 120)(text "DATE" (rect 2 0 30 12)(font "Arial" ))(text "Tue Nov 05 15:04:52 2024" (rect 56 3 233 19)(font "Arial" (font_size 10)))(date)(border))
+	(section (rect 0 96 240 120)(text "DATE" (rect 2 0 30 12)(font "Arial" ))(text "Wed Nov 06 23:18:15 2024" (rect 56 3 240 19)(font "Arial" (font_size 10)))(date)(border))
 	(section (rect 240 96 310 120)(text "SHEET" (rect 2 0 37 12)(font "Arial" ))(text "1" (rect 55 5 63 21)(font "Arial" (font_size 10))))
 	(section (rect 310 96 368 120)(text "OF" (rect 10 0 25 12)(font "Arial" ))(text "1" (rect 34 4 42 20)(font "Arial" (font_size 10))))
 	(drawing

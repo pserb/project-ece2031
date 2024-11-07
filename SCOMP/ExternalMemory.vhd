@@ -21,18 +21,29 @@ ENTITY ExternalMemory IS
         EXTMEMDATA_EN,
 		  EXTMEMCONFIG_EN,
 		  EXTMEMERR_EN,
+		  EXTMEMID_EN,
+		  EXTMEMBOUNDS_EN,
         IO_WRITE : IN STD_LOGIC;
         IO_DATA : INOUT STD_LOGIC_VECTOR(15 DOWNTO 0)
     );
 END ExternalMemory;
 
 ARCHITECTURE a OF ExternalMemory IS
+	 SIGNAL id : STD_LOGIC_VECTOR(15 DOWNTO 0);
+	 SIGNAL id_a : STD_LOGIC_VECTOR(15 DOWNTO 0);
+	 SIGNAL id_b : STD_LOGIC_VECTOR(15 DOWNTO 0);
+	 SIGNAL bound_in_a : STD_LOGIC_VECTOR(15 DOWNTO 0);
+	 SIGNAL bound_out_a : STD_LOGIC_VECTOR(15 DOWNTO 0);
+	 SIGNAL bound_in_b : STD_LOGIC_VECTOR(15 DOWNTO 0);
+	 SIGNAL bound_out_b : STD_LOGIC_VECTOR(15 DOWNTO 0);
     SIGNAL address : STD_LOGIC_VECTOR(15 DOWNTO 0);
     SIGNAL data_in : STD_LOGIC_VECTOR(15 DOWNTO 0);
     SIGNAL data_out : STD_LOGIC_VECTOR(15 DOWNTO 0);
 	 SIGNAL err : STD_LOGIC_VECTOR(15 DOWNTO 0);
 	 SIGNAL config : STD_LOGIC_VECTOR(15 DOWNTO 0);
     SIGNAL wren : STD_LOGIC;
+	 SIGNAL wren_bound_a: STD_LOGIC;
+	 SIGNAL wren_bound_b: STD_LOGIC;
 	 
 	 SIGNAL write_inc_en : STD_LOGIC;
 	 SIGNAL read_inc_en : STD_LOGIC;
@@ -46,6 +57,12 @@ ARCHITECTURE a OF ExternalMemory IS
 		decrementing
 	 );
 	 SIGNAL state : state_type;
+	 
+	 type bounds_state_type is (
+		idle,
+		check
+	 );
+	 SIGNAL bounds_state : bounds_state_type;
 BEGIN
     -- use altsyncram component for memory
     -- the way this works is if EXTMEMADDR_EN is high, then the memory is being addressed
@@ -69,6 +86,38 @@ BEGIN
         data_a => data_in,
         wren_a => wren,
         q_a => data_out
+    );
+	 
+	 -- use altsyncram component for bounds
+    -- the way this works is if EXTMEMADDR_EN is high, then the memory is being addressed
+    -- that means that IO_DATA stores the address
+    -- if EXTMEMDATA_EN is high, then the memory is being written to
+    -- that means that IO_DATA stores the data to be written
+    memory_component : altsyncram
+    GENERIC MAP(
+        operation_mode => "DUAL_PORT",
+        width_a => 16,
+        widthad_a => 16,
+        numwords_a => 2 ** 16,
+        outdata_reg_a => "UNREGISTERED",
+		  width_b => 16,
+        widthad_b => 16,
+        numwords_b => 2 ** 16,
+        outdata_reg_b => "UNREGISTERED",
+        init_file => "ExternalMemory.mif",
+        read_during_write_mode_port_a => "NEW_DATA_NO_NBE_READ",
+        intended_device_family => "MAX 10"
+    )
+    PORT MAP(
+        clock0 => CLOCK,
+        address_a => id_a,
+        data_a => bound_in_a,
+        wren_a => wren_bound_a,
+        q_a => bound_out_a,
+		  address_a => id_b,
+        data_a => bound_in_b,
+        wren_a => wren_bound_b,
+        q_a => bound_out_b
     );
 
     -- Use Intel LPM IP to create tristate drivers
@@ -120,30 +169,63 @@ BEGIN
 				config <= (OTHERS => '0');
 				state <= idle;
             wren <= '0';
+				
+				id <= (OTHERS => '0');
+            bound_in <= (OTHERS => '0');
+				bounds_state <= idle;
+            wren_bound <= '0';
         ELSIF rising_edge(CLOCK) THEN
             IF EXTMEMADDR_EN = '1' AND state = idle THEN
                 address <= IO_DATA;
             END IF;
+				
+				IF EXTMEMID_EN = '1' AND state = idle AND bounds_state = idle THEN
+					id <= IO_DATA;
+				END IF;
+				
+				IF EXTMEMBOUNDS_EN = '1' AND state = idle THEN
+					IF bounds_state = idle THEN
+						bounds_state <= check_lower;
+						id_a <= IF id = 0 THEN id ELSE id - 1;
+						id_b <= IF id = 16#FFFF# THEN id ELSE id + 1;
+					ELSIF bounds_state = check
+						AND (bound_out_a <  IO_DATA OR IO_DATA = bound_out_a)
+						AND (bound_out_b > IO_DATA OR IO_DATA = bound_out_b) THEN
+						bounds_state <= idle;
+						id_a <= IF id = 0 THEN id ELSE id - 1;
+						id_b <= id;
+						bound_in_b <= IO_DATA
+						wren_bound_b = '1';
+					ELSE
+						err <= X"0002";
+						bounds_state <= idle;
+					END IF;
+				END IF;
 
             IF EXTMEMDATA_EN = '1' AND state = idle THEN
-                data_in <= IO_DATA;
-                wren <= '1';
+					IF (address < bound_out_b OR address = bound_out_b) AND bound_out_a < address THEN
+					 data_in <= IO_DATA;
+					 wren <= '1';
 					 
-					 IF write_inc_en = '1' AND IO_WRITE = '1' THEN
-						IF write_inc_dir = '1' THEN
-							state <= decrementing;
-						ELSE
-							state <= incrementing;
+						IF write_inc_en = '1' AND IO_WRITE = '1' THEN
+							IF write_inc_dir = '1' THEN
+								state <= decrementing;
+							ELSE
+								state <= incrementing;
+							END IF;
 						END IF;
-					 END IF;
-					 
-					 IF read_inc_en = '1' AND IO_WRITE = '0' THEN
-						IF read_inc_dir = '1' THEN
-							state <= decrementing;
-						ELSE
-							state <= incrementing;
+
+						IF read_inc_en = '1' AND IO_WRITE = '0' THEN
+							IF read_inc_dir = '1' THEN
+								state <= decrementing;
+							ELSE
+								state <= incrementing;
+							END IF;
 						END IF;
-					 END IF;
+					ELSE
+						err <= X"0003";
+						wren <= '0';
+					END IF;
             ELSE
                 wren <= '0';
             END IF;
