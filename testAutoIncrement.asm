@@ -33,10 +33,10 @@ Beginning:
     OUT MemAddr
     IN MemData
     OUT Hex0
-    ; CALL Delay
+    CALL Delay
     IN MemData
     OUT Hex0
-    ; CALL Delay
+    CALL Delay
 
     ; reads with delay
     ; config decrementing 2 on read only
@@ -48,12 +48,12 @@ Beginning:
     ; should be 4
     IN MemData
     OUT Hex0
-    ; CALL Delay
+    CALL Delay
 
     ; should be 2
     IN MemData
     OUT Hex0
-    ; CALL Delay
+    CALL Delay
 
     LOADI 3
     OUT MemAddr
@@ -61,7 +61,7 @@ Beginning:
     ; should be 3
     IN MemData
     OUT Hex0
-    ; CALL Delay
+    CALL Delay
 
     LOADI 5
     OUT MemData
@@ -69,28 +69,28 @@ Beginning:
     ; should be 0
     IN MemErr
     OUT Hex0
-    ; CALL Delay
+    CALL Delay
     
     ; should be 5
     IN MemData
     OUT Hex0
-    ; CALL Delay
+    CALL Delay
 
     ; should be 0xFFFF
     IN MemErr
     OUT Hex0
-    ; CALL Delay
+    CALL Delay
 
     ; should be 0
     OUT MemErr
     IN MemErr
     OUT Hex0
-    ; CALL Delay
+    CALL Delay
 
     ; should be 0xF
     IN MemData
     OUT Hex0
-    ; CALL Delay
+    CALL Delay
     
     ; config update to increment 7 on write as well
     LOADI &H6F
@@ -100,7 +100,7 @@ Beginning:
     OUT MemData
     IN MemErr
     OUT Hex0
-    ; CALL Delay
+    CALL Delay
 
     JUMP Beginning
 
