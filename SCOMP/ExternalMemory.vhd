@@ -113,14 +113,11 @@ BEGIN
 	 write_inc_dir <= config(4);
 	 read_inc_dir <= config(3);
 
-    IF byte_en = "01" THEN
-        data_out <= "00000000" & inter_out(7 DOWNTO 0);
-    ELSIF byte_en = "10" THEN
-        data_out <= "00000000" & inter_out(15 DOWNTO 8); 
-    ELSE
-        data_out <= inter_out;                   
-    END IF
-
+	 WITH byte_en SELECT data_out <=
+		"00000000" & inter_out(7 DOWNTO 0) WHEN "01",
+		"00000000" & inter_out(15 DOWNTO 8) WHEN "10",
+		inter_out WHEN OTHERS;
+    
     PROCESS (CLOCK, RESETN)
     BEGIN
         IF RESETN = '0' THEN
@@ -142,7 +139,7 @@ BEGIN
                     data_in(15 DOWNTO 8) <= IO_DATA(15 DOWNTO 8); 
                 ELSE
                     data_in <= IO_DATA;                   
-                END IF
+                END IF;
 
                 wren <= '1';
 					 
