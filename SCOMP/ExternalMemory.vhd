@@ -30,6 +30,7 @@ ARCHITECTURE a OF ExternalMemory IS
     SIGNAL address : STD_LOGIC_VECTOR(15 DOWNTO 0);
     SIGNAL data_in : STD_LOGIC_VECTOR(15 DOWNTO 0);
     SIGNAL data_out : STD_LOGIC_VECTOR(15 DOWNTO 0);
+    SIGNAL inter_out : STD_LOGIC_VECTOR(15 DOWNTO 0);
 	 SIGNAL err : STD_LOGIC_VECTOR(15 DOWNTO 0);
 	 SIGNAL config : STD_LOGIC_VECTOR(15 DOWNTO 0);
     SIGNAL wren : STD_LOGIC;
@@ -38,6 +39,7 @@ ARCHITECTURE a OF ExternalMemory IS
 	 SIGNAL read_inc_en : STD_LOGIC;
 	 SIGNAL write_inc_dir : STD_LOGIC;
 	 SIGNAL read_inc_dir : STD_LOGIC;
+     SIGNAL byte_en : STD_LOGIC_VECTOR(1 DOWNTO 0);
 	 SIGNAL inc_val : STD_LOGIC_VECTOR(15 DOWNTO 0);
 	 
 	 type state_type is (
@@ -68,7 +70,7 @@ BEGIN
         address_a => address,
         data_a => data_in,
         wren_a => wren,
-        q_a => data_out
+        q_a => inter_out
     );
 
     -- Use Intel LPM IP to create tristate drivers
@@ -111,6 +113,14 @@ BEGIN
 	 write_inc_dir <= config(4);
 	 read_inc_dir <= config(3);
 
+    IF byte_en = "01" THEN
+        data_out <= "00000000" & inter_out(7 DOWNTO 0);
+    ELSIF byte_en = "10" THEN
+        data_out <= "00000000" & inter_out(15 DOWNTO 8); 
+    ELSE
+        data_out <= inter_out;                   
+    END IF
+
     PROCESS (CLOCK, RESETN)
     BEGIN
         IF RESETN = '0' THEN
@@ -126,7 +136,14 @@ BEGIN
             END IF;
 
             IF EXTMEMDATA_EN = '1' AND state = idle THEN
-                data_in <= IO_DATA;
+                IF byte_en = "01" THEN
+                    data_in(7 DOWNTO 0) <= IO_DATA(7 DOWNTO 0);
+                ELSIF byte_en = "10" THEN
+                    data_in(15 DOWNTO 8) <= IO_DATA(15 DOWNTO 8); 
+                ELSE
+                    data_in <= IO_DATA;                   
+                END IF
+
                 wren <= '1';
 					 
 					 IF write_inc_en = '1' AND IO_WRITE = '1' THEN
@@ -171,6 +188,9 @@ BEGIN
 						err <= X"FFFF";
 					END IF;
 				END IF;
+
+                
+
         END IF;
     END PROCESS;
 
