@@ -59,15 +59,11 @@ ARCHITECTURE a OF ExternalMemory IS
 	 type state_type is (
 		idle,
 		incrementing,
-		decrementing
+		decrementing,
+		check,
+		stop
 	 );
 	 SIGNAL state : state_type;
-	 
-	 type bounds_state_type is (
-		idle,
-		check
-	 );
-	 SIGNAL bounds_state : bounds_state_type;
 BEGIN
     -- use altsyncram component for memory
     -- the way this works is if EXTMEMADDR_EN is high, then the memory is being addressed
@@ -182,13 +178,12 @@ BEGIN
 				id_b <= (OTHERS => '0');
             bound_in_b <= (OTHERS => '0');
 				wren_bound_b <= '0';
-				bounds_state <= idle;
         ELSIF rising_edge(CLOCK) THEN
             IF EXTMEMADDR_EN = '1' AND state = idle THEN
                 address <= IO_DATA;
             END IF;
 				
-				IF EXTMEMID_EN = '1' AND state = idle AND bounds_state = idle THEN
+				IF EXTMEMID_EN = '1' AND state = idle THEN
 					-- enforce that the ID can never be 0xFFFF
 					IF IO_DATA = X"FFFF" THEN
 						err <= X"0002";
@@ -197,10 +192,10 @@ BEGIN
 					END IF;
 				END IF;
 				
-				IF EXTMEMBOUNDS_EN = '1' AND state = idle THEN
-					IF bounds_state = idle THEN
+				IF EXTMEMBOUNDS_EN = '1' THEN
+					IF state = idle THEN
 						id_a <= id;
-						bounds_state <= check;
+						state <= check;
 						
 						IF id = X"FFFE" THEN
 							id_b <= id + 1;
@@ -208,11 +203,11 @@ BEGIN
 							id_b <= id + 2;
 						END IF;
 					
-					ELSIF bounds_state = check
+					ELSIF state = check
 						AND (bound_out_a <= IO_DATA)
 						AND (NOT (bound_out_a = X"0000") OR id_a = X"0000")
 						AND (bound_out_b >= IO_DATA OR bound_out_b = X"0000") THEN
-						bounds_state <= idle;
+						state <= stop;
 						id_a <= id;
 						id_b <= id + 1;
 						wren_bound_a <= '0';
@@ -227,12 +222,16 @@ BEGIN
 						
 					ELSE
 						err <= X"0002";
-						bounds_state <= idle;
+						state <= stop;
 					END IF;
 				END IF;
 				
+				IF (EXTMEMBOUNDS_EN = '0' OR EXTMEMDATA_EN = '0') AND state = stop THEN
+					state <= idle;
+				END IF;
 				
-				IF bound_out_b = X"0000" OR (address <= bound_out_b AND bound_out_a <= address) THEN
+				
+				IF bound_out_b = X"0000" OR (address < bound_out_b AND bound_out_a <= address) THEN
 					IF EXTMEMDATA_EN = '1' AND state = idle THEN
 							data_in <= IO_DATA;
 							wren <= '1';
@@ -270,7 +269,7 @@ BEGIN
 				END IF;
 				
 				IF state = incrementing THEN
-					state <= idle;
+					state <= stop;
 					address <= address + inc_val;
 					IF inc_val > (X"FFFF" - address) THEN
 						err <= X"0001";
@@ -278,7 +277,7 @@ BEGIN
 				END IF;
 				
 				IF state = decrementing THEN
-					state <= idle;
+					state <= stop;
 					address <= address - inc_val;
 					IF inc_val > address THEN
 						err <= X"FFFF";
