@@ -112,6 +112,7 @@ BEGIN
 	 read_inc_en <= config(5);
 	 write_inc_dir <= config(4);
 	 read_inc_dir <= config(3);
+	 byte_en <= config(8 DOWNTO 7);
 
 	 WITH byte_en SELECT data_out <=
 		"00000000" & inter_out(7 DOWNTO 0) WHEN "01",
@@ -172,14 +173,46 @@ BEGIN
 				
 				IF state = incrementing THEN
 					state <= idle;
-					address <= address + inc_val;
-					IF inc_val > (X"FFFF" - address) THEN
-						err <= X"0001";
-					END IF;
+					CASE byte_en IS
+						WHEN "01" =>
+							IF inc_val(0) = '1' THEN
+								byte_en <= "10";
+							END IF;
+							address <= address + inc_val_shifted;
+							IF inc_val_shifted > (X"FFFF" - address) THEN
+								err <= X"0001";
+							END IF;
+						WHEN "10" =>
+							IF inc_val(0) = '1' THEN
+								byte_en <= "01"
+								address <= address + inc_val_shifted + 1;
+								IF inc_val_shifted + 1 > (X"FFFF" - address) THEN
+									err <= X"0001";
+								END IF;
+							ELSE
+								address <= address + inc_val_shifted;
+								IF inc_val_shifted > (X"FFFF" - address) THEN
+									err <= X"0001";
+								END IF;
+							END IF;
+						WHEN OTHERS =>
+							address <= address + inc_val;
+							IF inc_val > (X"FFFF" - address) THEN
+								err <= X"0001";
+							END IF;
+					END CASE;
 				END IF;
 				
 				IF state = decrementing THEN
 					state <= idle;
+					CASE byte_en IS
+						WHEN "01" =>
+							IF inc_val(0) = '1' THEN
+								byte_en <= "10";
+								address <= address - inc_val_shifted - 1;
+								IF inc_val_shifted + 1 > address THEN
+									err <= X"FFFF";
+								END IF
 					address <= address - inc_val;
 					IF inc_val > address THEN
 						err <= X"FFFF";
