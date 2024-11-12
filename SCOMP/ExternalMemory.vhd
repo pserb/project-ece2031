@@ -24,7 +24,12 @@ ENTITY ExternalMemory IS
 		  EXTMEMID_EN,
 		  EXTMEMBOUNDS_EN,
         IO_WRITE : IN STD_LOGIC;
-        IO_DATA : INOUT STD_LOGIC_VECTOR(15 DOWNTO 0)
+        IO_DATA : INOUT STD_LOGIC_VECTOR(15 DOWNTO 0);
+		  ID_OUTA : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
+		  BOUND_OUTA : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
+		  ID_OUTB : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
+		  BOUND_OUTB : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
+		  ERROR_OUT : OUT STD_LOGIC_VECTOR(15 DOWNTO 0)
     );
 END ExternalMemory;
 
@@ -184,81 +189,84 @@ BEGIN
             END IF;
 				
 				IF EXTMEMID_EN = '1' AND state = idle AND bounds_state = idle THEN
-					id <= IO_DATA;
+					-- enforce that the ID can never be 0xFFFF
+					IF IO_DATA = X"FFFF" THEN
+						err <= X"0002";
+					ELSE
+						id <= IO_DATA;
+					END IF;
 				END IF;
 				
 				IF EXTMEMBOUNDS_EN = '1' AND state = idle THEN
 					IF bounds_state = idle THEN
+						id_a <= id;
 						bounds_state <= check;
-						IF id = X"0000" THEN
-							id_a <= id;
-						ELSE
-							id_a <= id - 1;
-						END IF;
 						
-						IF id = X"FFFF" THEN
-							id_b <= id;
-						ELSE
+						IF id = X"FFFE" THEN
 							id_b <= id + 1;
-						END IF;
-					ELSIF bounds_state = check
-						AND (bound_out_a < IO_DATA OR IO_DATA = bound_out_a)
-						and not (bound_out_a = X"0000")
-						AND (bound_out_b > IO_DATA OR IO_DATA = bound_out_b OR bound_out_b = X"0000") THEN
-						bounds_state <= idle;
-						IF id = X"0000" THEN
-							id_a <= id;
 						ELSE
-							id_a <= id - 1;
+							id_b <= id + 2;
 						END IF;
+					
+					ELSIF bounds_state = check
+						AND (bound_out_a <= IO_DATA)
+						AND (NOT (bound_out_a = X"0000") OR id_a = X"0000")
+						AND (bound_out_b >= IO_DATA OR bound_out_b = X"0000") THEN
+						bounds_state <= idle;
+						id_a <= id;
+						id_b <= id + 1;
+						wren_bound_a <= '0';
+						wren_bound_b <= '1';
+						err <= X"0000";
 						
-						IF IO_DATA = x"0000" THEN
+						IF IO_DATA = X"0000" THEN
 							bound_in_b <= bound_in_a;
 						ELSE
 							bound_in_b <= IO_DATA;
 						END IF;
-							id_b <= id;
-							wren_bound_b <= '1';
+						
 					ELSE
 						err <= X"0002";
 						bounds_state <= idle;
 					END IF;
 				END IF;
-
-            IF EXTMEMDATA_EN = '1' AND state = idle THEN
-					IF bound_out_b = X"0000" OR (address < bound_out_b AND (bound_out_a < address or address = bound_out_a or id_a = x"0000")) THEN
-					 data_in <= IO_DATA;
-					 wren <= '1';
-					 
-						IF write_inc_en = '1' AND IO_WRITE = '1' THEN
-							IF write_inc_dir = '1' THEN
-								state <= decrementing;
-							ELSE
-								state <= incrementing;
+				
+				
+				IF bound_out_b = X"0000" OR (address <= bound_out_b AND bound_out_a <= address) THEN
+					IF EXTMEMDATA_EN = '1' AND state = idle THEN
+							data_in <= IO_DATA;
+							wren <= '1';
+							err <= X"0000";
+						 
+							IF write_inc_en = '1' AND IO_WRITE = '1' THEN
+								IF write_inc_dir = '1' THEN
+									state <= decrementing;
+								ELSE
+									state <= incrementing;
+								END IF;
 							END IF;
-						END IF;
 
-						IF read_inc_en = '1' AND IO_WRITE = '0' THEN
-							IF read_inc_dir = '1' THEN
-								state <= decrementing;
-							ELSE
-								state <= incrementing;
+							IF read_inc_en = '1' AND IO_WRITE = '0' THEN
+								IF read_inc_dir = '1' THEN
+									state <= decrementing;
+								ELSE
+									state <= incrementing;
+								END IF;
 							END IF;
-						END IF;
 					ELSE
+						 wren <= '0';
+					END IF;
+				ELSE
 						err <= X"0003";
 						wren <= '0';
-					END IF;
-            ELSE
-                wren <= '0';
-            END IF;
+				END IF;
 				
 				IF EXTMEMCONFIG_EN = '1' AND state = idle THEN
 					config <= IO_DATA;
 				END IF;
 				
 				IF EXTMEMERR_EN = '1' AND IO_WRITE = '1' AND state = idle THEN
-					err <= (OTHERS => '0');
+					err <= X"0000";
 				END IF;
 				
 				IF state = incrementing THEN
@@ -278,5 +286,10 @@ BEGIN
 				END IF;
         END IF;
     END PROCESS;
+ID_OUTA <= id_a;
+BOUND_OUTA <= bound_out_a;
+ID_OUTB <= id_b;
+BOUND_OUTB <= bound_out_b;
+ERROR_OUT <= err;
 
 END a;
