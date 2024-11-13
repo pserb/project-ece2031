@@ -5,11 +5,11 @@ ADDRESS_RADIX=HEX;
 DATA_RADIX=HEX;
 
 CONTENT BEGIN
-0000: 083B; --     LOAD AddrMax
+0000: 0843; --     LOAD AddrMax
 0001: 9870; --     OUT MemAddr
 0002: B80F; --     LOADI 15
 0003: 9871; --     OUT MemData
-0004: B841; --     LOADI &amp;H41
+0004: B841; --     LOADI &H41
 0005: 9872; --     OUT MemConfig
 0006: B800; --     LOADI 0
 0007: 9870; --     OUT MemAddr
@@ -26,46 +26,53 @@ CONTENT BEGIN
 0012: 9870; --     OUT MemAddr
 0013: 9071; --     IN MemData
 0014: 9804; --     OUT Hex0
-0015: 9071; --     IN MemData
-0016: 9804; --     OUT Hex0
-0017: B82A; --     LOADI &amp;H2A
-0018: 9872; --     OUT MemConfig
-0019: B804; --     LOADI 4
-001A: 9870; --     OUT MemAddr
-001B: 9071; --     IN MemData
-001C: 9804; --     OUT Hex0
+0015: 803E; --     CALL Delay
+0016: 9071; --     IN MemData
+0017: 9804; --     OUT Hex0
+0018: 803E; --     CALL Delay
+0019: B82A; --     LOADI &H2A
+001A: 9872; --     OUT MemConfig
+001B: B804; --     LOADI 4
+001C: 9870; --     OUT MemAddr
 001D: 9071; --     IN MemData
 001E: 9804; --     OUT Hex0
-001F: B803; --     LOADI 3
-0020: 9870; --     OUT MemAddr
-0021: 9071; --     IN MemData
-0022: 9804; --     OUT Hex0
-0023: B805; --     LOADI 5
-0024: 9871; --     OUT MemData
-0025: 9073; --     IN MemErr
+001F: 803E; --     CALL Delay
+0020: 9071; --     IN MemData
+0021: 9804; --     OUT Hex0
+0022: 803E; --     CALL Delay
+0023: B803; --     LOADI 3
+0024: 9870; --     OUT MemAddr
+0025: 9071; --     IN MemData
 0026: 9804; --     OUT Hex0
-0027: 9071; --     IN MemData
-0028: 9804; --     OUT Hex0
-0029: 9073; --     IN MemErr
-002A: 9804; --     OUT Hex0
-002B: 9873; --     OUT MemErr
-002C: 9073; --     IN MemErr
-002D: 9804; --     OUT Hex0
-002E: 9071; --     IN MemData
-002F: 9804; --     OUT Hex0
-0030: B86F; --     LOADI &amp;H6F
-0031: 9872; --     OUT MemConfig
-0032: 9871; --     OUT MemData
-0033: 9073; --     IN MemErr
-0034: 9804; --     OUT Hex0
-0035: 2800; --     JUMP Beginning
-0036: 9802; -- 	OUT    Timer
-0037: 9002; -- 	IN     Timer
-0038: 6FF6; -- 	ADDI   -10
-0039: 3037; -- 	JNEG   WaitingLoop
-003A: 8800; -- 	RETURN
-003B: FFFF; -- AddrMax: DW &amp;HFFFF
-003C: FFFF; -- DataMax: DW &amp;HFFFF
-[003D..07FF] : 0000; -- [empty memory]
+0027: 803E; --     CALL Delay
+0028: B805; --     LOADI 5
+0029: 9871; --     OUT MemData
+002A: 9073; --     IN MemErr
+002B: 9804; --     OUT Hex0
+002C: 803E; --     CALL Delay
+002D: 9071; --     IN MemData
+002E: 9804; --     OUT Hex0
+002F: 803E; --     CALL Delay
+0030: 9073; --     IN MemErr
+0031: 9804; --     OUT Hex0
+0032: 803E; --     CALL Delay
+0033: 9873; --     OUT MemErr
+0034: 9073; --     IN MemErr
+0035: 9804; --     OUT Hex0
+0036: 9071; --     IN MemData
+0037: 9804; --     OUT Hex0
+0038: B86F; --     LOADI &H6F
+0039: 9872; --     OUT MemConfig
+003A: 9871; --     OUT MemData
+003B: 9073; --     IN MemErr
+003C: 9804; --     OUT Hex0
+003D: 2800; --     JUMP Beginning
+003E: 9802; -- 	OUT    Timer
+003F: 9002; -- 	IN     Timer
+0040: 6FF6; -- 	ADDI   -10
+0041: 303F; -- 	JNEG   WaitingLoop
+0042: 8800; -- 	RETURN
+0043: FFFF; -- AddrMax: DW &HFFFF
+0044: FFFF; -- DataMax: DW &HFFFF
+[0045..07FF] : 0000; -- [empty memory]
 END;
-

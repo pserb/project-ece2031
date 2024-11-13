@@ -181,6 +181,7 @@ BEGIN
         ELSIF rising_edge(CLOCK) THEN
             IF EXTMEMADDR_EN = '1' AND state = idle THEN
                 address <= IO_DATA;
+					 state <= stop;
             END IF;
 				
 				IF EXTMEMID_EN = '1' AND state = idle THEN
@@ -190,6 +191,7 @@ BEGIN
 					ELSE
 						id <= IO_DATA;
 					END IF;
+					state <= stop;
 				END IF;
 				
 				IF EXTMEMBOUNDS_EN = '1' THEN
@@ -226,12 +228,18 @@ BEGIN
 					END IF;
 				END IF;
 				
-				IF (EXTMEMBOUNDS_EN = '0' OR EXTMEMDATA_EN = '0') AND state = stop THEN
+				IF EXTMEMADDR_EN = '0' AND 
+					EXTMEMID_EN = '0' AND
+					EXTMEMBOUNDS_EN = '0' AND
+					EXTMEMDATA_EN = '0' AND
+					EXTMEMCONFIG_EN = '0' AND
+					EXTMEMERR_EN = '0' AND
+					state = stop THEN
 					state <= idle;
 				END IF;
 				
 				
-				IF bound_out_b = X"0000" OR (address < bound_out_b AND bound_out_a <= address) THEN
+				IF id_b = X"0000" OR bound_out_b = X"0000" OR (address < bound_out_b AND bound_out_a <= address) THEN
 					IF EXTMEMDATA_EN = '1' AND state = idle THEN
 							data_in <= IO_DATA;
 							wren <= '1';
@@ -243,7 +251,6 @@ BEGIN
 								ELSE
 									state <= incrementing;
 								END IF;
-							END IF;
 
 							IF read_inc_en = '1' AND IO_WRITE = '0' THEN
 								IF read_inc_dir = '1' THEN
@@ -251,6 +258,8 @@ BEGIN
 								ELSE
 									state <= incrementing;
 								END IF;
+							ELSE
+								state <= stop;
 							END IF;
 					ELSE
 						 wren <= '0';
@@ -258,14 +267,17 @@ BEGIN
 				ELSE
 						err <= X"0003";
 						wren <= '0';
+						state <= stop;
 				END IF;
 				
 				IF EXTMEMCONFIG_EN = '1' AND state = idle THEN
 					config <= IO_DATA;
+					state <= stop;
 				END IF;
 				
 				IF EXTMEMERR_EN = '1' AND IO_WRITE = '1' AND state = idle THEN
 					err <= X"0000";
+					state <= stop;
 				END IF;
 				
 				IF state = incrementing THEN
