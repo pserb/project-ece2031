@@ -252,13 +252,13 @@ BEGIN
 									state <= incrementing;
 								END IF;
 
-							IF read_inc_en = '1' AND IO_WRITE = '0' THEN
+							ELSIF read_inc_en = '1' AND IO_WRITE = '0' THEN
 								IF read_inc_dir = '1' THEN
 									state <= decrementing;
 								ELSE
 									state <= incrementing;
 								END IF;
-							ELSE
+							ELSE 
 								state <= stop;
 							END IF;
 					ELSE
