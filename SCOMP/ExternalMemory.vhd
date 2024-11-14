@@ -266,7 +266,7 @@ BEGIN
 					state <= stop;
 				END IF;
 				
-				IF state = incrementing THEN
+				IF state = incrementing AND EXTMEMDATA_EN = '0' THEN
 					state <= stop;
 					address <= address + inc_val;
 					IF inc_val > (X"FFFF" - address) THEN
@@ -274,7 +274,7 @@ BEGIN
 					END IF;
 				END IF;
 				
-				IF state = decrementing THEN
+				IF state = decrementing AND EXTMEMDATA_EN = '0' THEN
 					state <= stop;
 					address <= address - inc_val;
 					IF inc_val > address THEN
