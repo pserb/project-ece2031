@@ -34,6 +34,7 @@ Beginning:
     IN MemData
     OUT Hex0
     CALL Delay
+	
     IN MemData
     OUT Hex0
     CALL Delay
@@ -85,12 +86,12 @@ Beginning:
     OUT MemErr
     IN MemErr
     OUT Hex0
-    ; CALL Delay
+    CALL Delay
 
     ; should be 0xF
     IN MemData
     OUT Hex0
-    ; CALL Delay
+    CALL Delay
     
     ; config update to increment 7 on write as well
     LOADI &H6F
@@ -100,7 +101,7 @@ Beginning:
     OUT MemData
     IN MemErr
     OUT Hex0
-    ; CALL Delay
+    CALL Delay
 
     JUMP Beginning
 

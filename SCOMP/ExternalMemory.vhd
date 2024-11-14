@@ -24,12 +24,7 @@ ENTITY ExternalMemory IS
 		  EXTMEMID_EN,
 		  EXTMEMBOUNDS_EN,
         IO_WRITE : IN STD_LOGIC;
-        IO_DATA : INOUT STD_LOGIC_VECTOR(15 DOWNTO 0);
-		  ID_OUTA : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
-		  BOUND_OUTA : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
-		  ID_OUTB : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
-		  BOUND_OUTB : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
-		  ERROR_OUT : OUT STD_LOGIC_VECTOR(15 DOWNTO 0)
+        IO_DATA : INOUT STD_LOGIC_VECTOR(15 DOWNTO 0)
     );
 END ExternalMemory;
 
@@ -178,13 +173,14 @@ BEGIN
 				id_b <= (OTHERS => '0');
             bound_in_b <= (OTHERS => '0');
 				wren_bound_b <= '0';
+				id <= (OTHERS => '0');
         ELSIF rising_edge(CLOCK) THEN
-            IF EXTMEMADDR_EN = '1' AND state = idle THEN
+            IF EXTMEMADDR_EN = '1' AND IO_WRITE = '1' AND state = idle THEN
                 address <= IO_DATA;
 					 state <= stop;
             END IF;
 				
-				IF EXTMEMID_EN = '1' AND state = idle THEN
+				IF EXTMEMID_EN = '1' AND IO_WRITE = '1' AND state = idle THEN
 					-- enforce that the ID can never be 0xFFFF
 					IF IO_DATA = X"FFFF" THEN
 						err <= X"0002";
@@ -194,7 +190,7 @@ BEGIN
 					state <= stop;
 				END IF;
 				
-				IF EXTMEMBOUNDS_EN = '1' THEN
+				IF EXTMEMBOUNDS_EN = '1' AND IO_WRITE = '1' THEN
 					IF state = idle THEN
 						id_a <= id;
 						state <= check;
@@ -228,16 +224,6 @@ BEGIN
 					END IF;
 				END IF;
 				
-				IF EXTMEMADDR_EN = '0' AND 
-					EXTMEMID_EN = '0' AND
-					EXTMEMBOUNDS_EN = '0' AND
-					EXTMEMDATA_EN = '0' AND
-					EXTMEMCONFIG_EN = '0' AND
-					EXTMEMERR_EN = '0' AND
-					state = stop THEN
-					state <= idle;
-				END IF;
-				
 				
 				IF id_b = X"0000" OR bound_out_b = X"0000" OR (address < bound_out_b AND bound_out_a <= address) THEN
 					IF EXTMEMDATA_EN = '1' AND state = idle THEN
@@ -258,7 +244,7 @@ BEGIN
 								ELSE
 									state <= incrementing;
 								END IF;
-							ELSE 
+							ELSE
 								state <= stop;
 							END IF;
 					ELSE
@@ -270,7 +256,7 @@ BEGIN
 						state <= stop;
 				END IF;
 				
-				IF EXTMEMCONFIG_EN = '1' AND state = idle THEN
+				IF EXTMEMCONFIG_EN = '1' AND IO_WRITE = '1' AND state = idle THEN
 					config <= IO_DATA;
 					state <= stop;
 				END IF;
@@ -295,12 +281,16 @@ BEGIN
 						err <= X"FFFF";
 					END IF;
 				END IF;
+				IF EXTMEMADDR_EN = '0' AND 
+					EXTMEMID_EN = '0' AND
+					EXTMEMBOUNDS_EN = '0' AND
+					EXTMEMDATA_EN = '0' AND
+					EXTMEMCONFIG_EN = '0' AND
+					EXTMEMERR_EN = '0' AND
+					state = stop THEN
+					state <= idle;
+				END IF;
         END IF;
     END PROCESS;
-ID_OUTA <= id_a;
-BOUND_OUTA <= bound_out_a;
-ID_OUTB <= id_b;
-BOUND_OUTB <= bound_out_b;
-ERROR_OUT <= err;
 
 END a;
