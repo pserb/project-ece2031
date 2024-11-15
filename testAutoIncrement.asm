@@ -34,6 +34,7 @@ Beginning:
     IN MemData
     OUT Hex0
     CALL Delay
+
     IN MemData
     OUT Hex0
     CALL Delay
