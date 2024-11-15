@@ -1,0 +1,52 @@
+WIDTH=16;
+DEPTH=2048;
+
+ADDRESS_RADIX=HEX;
+DATA_RADIX=HEX;
+
+CONTENT BEGIN
+0000: 082A; --     LOAD UserMemConfig
+0001: 9872; --     OUT MemConfig
+0002: 800D; --     CALL initArray
+0003: B800; --     LOADI 0
+0004: 9870; --     OUT MemAddr
+0005: 8014; --     CALL readArray
+0006: 8014; --     CALL readArray
+0007: 8014; --     CALL readArray
+0008: 8014; --     CALL readArray
+0009: 8014; --     CALL readArray
+000A: 8014; --     CALL readArray
+000B: 8018; --     CALL reset
+000C: 2800; --     JUMP prog
+000D: 801D; --     CALL saveToArray
+000E: 0828; --     LOAD loopCounter
+000F: 6FFF; --     ADDI -1
+0010: 1028; --     STORE loopCounter
+0011: 0828; --     LOAD loopCounter
+0012: 380D; --     JPOS initArray
+0013: 8800; --     RETURN
+0014: 9071; --     IN MemData
+0015: 9804; --     OUT Hex0
+0016: 8023; --     CALL Delay
+0017: 8800; --     RETURN
+0018: B805; --     LOADI 5
+0019: 1028; --     STORE loopCounter
+001A: B801; --     LOADI 1
+001B: 1029; --     STORE arrayCounter
+001C: 8800; --     RETURN
+001D: 0829; --     LOAD arrayCounter
+001E: 9871; --     OUT MemData
+001F: 0829; --     LOAD arrayCounter
+0020: 6801; --     ADDI 1
+0021: 1029; --     STORE arrayCounter
+0022: 8800; --     RETURN
+0023: 9802; -- 	OUT    Timer
+0024: 9002; -- 	IN     Timer
+0025: 6FF6; -- 	ADDI   -10
+0026: 3024; -- 	JNEG   WaitingLoop
+0027: 8800; -- 	RETURN
+0028: 0005; -- loopCounter: DW 5
+0029: 0001; -- arrayCounter: DW 1
+002A: 0061; -- UserMemConfig: DW &B0000000001100001
+[002B..07FF] : 0000; -- [empty memory]
+END;
