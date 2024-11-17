@@ -41,6 +41,7 @@ ARCHITECTURE a OF ExternalMemory IS
 	 SIGNAL read_inc_dir : STD_LOGIC;
      SIGNAL byte_en : STD_LOGIC_VECTOR(1 DOWNTO 0);
 	 SIGNAL inc_val : STD_LOGIC_VECTOR(15 DOWNTO 0);
+	 SIGNAL inc_val_shifted : STD_LOGIC_VECTOR(15 DOWNTO 0);
 	 
 	 type state_type is (
 		idle,
@@ -108,11 +109,12 @@ BEGIN
 	 
 	 inc_val(2 DOWNTO 0) <= config(2 DOWNTO 0);
 	 inc_val(15 DOWNTO 3) <= (OTHERS => '0');
+	 inc_val_shifted <= '0' & inc_val(15 DOWNTO 1);
 	 write_inc_en <= config(6);
 	 read_inc_en <= config(5);
 	 write_inc_dir <= config(4);
 	 read_inc_dir <= config(3);
-	 byte_en <= config(8 DOWNTO 7);
+	 byte_en(1 DOWNTO 0) <= config(8 DOWNTO 7);
 
 	 WITH byte_en SELECT data_out <=
 		"00000000" & inter_out(7 DOWNTO 0) WHEN "01",
@@ -137,7 +139,7 @@ BEGIN
                 IF byte_en = "01" THEN
                     data_in(7 DOWNTO 0) <= IO_DATA(7 DOWNTO 0);
                 ELSIF byte_en = "10" THEN
-                    data_in(15 DOWNTO 8) <= IO_DATA(15 DOWNTO 8); 
+                    data_in(15 DOWNTO 8) <= IO_DATA(7 DOWNTO 0); 
                 ELSE
                     data_in <= IO_DATA;                   
                 END IF;
@@ -176,7 +178,7 @@ BEGIN
 					CASE byte_en IS
 						WHEN "01" =>
 							IF inc_val(0) = '1' THEN
-								byte_en <= "10";
+								config(8 DOWNTO 7) <= "10";
 							END IF;
 							address <= address + inc_val_shifted;
 							IF inc_val_shifted > (X"FFFF" - address) THEN
@@ -184,7 +186,7 @@ BEGIN
 							END IF;
 						WHEN "10" =>
 							IF inc_val(0) = '1' THEN
-								byte_en <= "01"
+								config(8 DOWNTO 7) <= "01";
 								address <= address + inc_val_shifted + 1;
 								IF inc_val_shifted + 1 > (X"FFFF" - address) THEN
 									err <= X"0001";
@@ -208,15 +210,31 @@ BEGIN
 					CASE byte_en IS
 						WHEN "01" =>
 							IF inc_val(0) = '1' THEN
-								byte_en <= "10";
+								config(8 DOWNTO 7) <= "10";
 								address <= address - inc_val_shifted - 1;
 								IF inc_val_shifted + 1 > address THEN
 									err <= X"FFFF";
-								END IF
-					address <= address - inc_val;
-					IF inc_val > address THEN
-						err <= X"FFFF";
-					END IF;
+								END IF;
+							ELSE
+								address <= address - inc_val_shifted;
+								IF inc_val_shifted > address THEN
+									err <= X"FFFF";
+								END IF;
+							END IF;
+						WHEN "10" =>
+							IF inc_val(0) = '1' THEN
+								config(8 DOWNTO 7) <= "01";
+							END IF;
+							address <= address - inc_val_shifted;
+							IF inc_val_shifted > address THEN
+								err <= X"FFFF";
+							END IF;
+						WHEN OTHERS =>
+							address <= address - inc_val;
+							IF inc_val > address THEN
+								err <= X"FFFF";
+							END IF;
+					END CASE;
 				END IF;
 
                 

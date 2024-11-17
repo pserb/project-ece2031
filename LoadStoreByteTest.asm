@@ -3,22 +3,22 @@
 START:
 LOADI 0
 OUT Address
-LOADI LByteConfig
+LOAD LByteConfig
 OUT Config
-LOADI SOMEVALUE
+LOAD SOMEVALUE
 OUT Data
-LOADI HByteConfig
+LOAD HByteConfig
 OUT Config
-LOADI SOMEVALUE
+LOAD SOMEVALUE
 OUT Data
 
-LOADI LByteConfig
+LOAD LByteConfig
 OUT Config
 IN DATA
 OUT HEX0
 CALL Delay
 
-LOADI HByteConfig
+LOAD HByteConfig
 OUT Config
 IN DATA
 OUT HEX0
