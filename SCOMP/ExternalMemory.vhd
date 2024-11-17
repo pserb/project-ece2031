@@ -144,7 +144,11 @@ BEGIN
                     data_in <= IO_DATA;                   
                 END IF;
 
-                wren <= '1';
+					 IF IO_WRITE = '1' THEN
+						wren <= '1';
+					 ELSE
+						wren <= '0';
+					 END IF;
 					 
 					 IF write_inc_en = '1' AND IO_WRITE = '1' THEN
 						IF write_inc_dir = '1' THEN

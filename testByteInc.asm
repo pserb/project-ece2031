@@ -71,12 +71,17 @@ Beginning:
     OUT Hex0
     CALL Delay
 
+    ; should be 1
+    IN MemData
+    OUT Hex0
+    CALL Delay
+
     ; should be 0
     IN MemErr
     OUT Hex0
     CALL Delay
     
-    ; should be 1
+    ; should be 0
     IN MemData
     OUT Hex0
     CALL Delay
@@ -88,7 +93,7 @@ Beginning:
 
     OUT MemErr
 
-    ; should be 0x34
+    ; should be 0x12
     IN MemData
     OUT Hex0
     CALL Delay
