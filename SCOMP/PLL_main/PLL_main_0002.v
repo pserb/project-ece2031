@@ -16,6 +16,9 @@ module  PLL_main_0002(
 	// interface 'outclk2'
 	output wire outclk_2,
 
+	// interface 'outclk3'
+	output wire outclk_3,
+
 	// interface 'locked'
 	output wire locked
 );
@@ -27,7 +30,7 @@ module  PLL_main_0002(
 		.pll_fractional_cout(32),
 		.pll_dsm_out_sel("1st_order"),
 		.operation_mode("direct"),
-		.number_of_clocks(3),
+		.number_of_clocks(4),
 		.output_clock_frequency0("12.000000 MHz"),
 		.phase_shift0("0 ps"),
 		.duty_cycle0(50),
@@ -37,7 +40,7 @@ module  PLL_main_0002(
 		.output_clock_frequency2("100.000000 MHz"),
 		.phase_shift2("0 ps"),
 		.duty_cycle2(50),
-		.output_clock_frequency3("0 MHz"),
+		.output_clock_frequency3("60.000000 MHz"),
 		.phase_shift3("0 ps"),
 		.duty_cycle3(50),
 		.output_clock_frequency4("0 MHz"),
@@ -113,13 +116,13 @@ module  PLL_main_0002(
 		.c_cnt_in_src2("cscd_clk"),
 		.c_cnt_bypass_en2("false"),
 		.c_cnt_odd_div_duty_en2("true"),
-		.c_cnt_hi_div3(1),
-		.c_cnt_lo_div3(1),
+		.c_cnt_hi_div3(3),
+		.c_cnt_lo_div3(2),
 		.c_cnt_prst3(1),
 		.c_cnt_ph_mux_prst3(0),
 		.c_cnt_in_src3("ph_mux_clk"),
-		.c_cnt_bypass_en3("true"),
-		.c_cnt_odd_div_duty_en3("false"),
+		.c_cnt_bypass_en3("false"),
+		.c_cnt_odd_div_duty_en3("true"),
 		.c_cnt_hi_div4(1),
 		.c_cnt_lo_div4(1),
 		.c_cnt_prst4(1),
@@ -230,7 +233,7 @@ module  PLL_main_0002(
 		.pll_slf_rst("false")
 	) altera_pll_i (
 		.rst	(rst),
-		.outclk	({outclk_2, output_unavailable, outclk_0}),
+		.outclk	({outclk_3, outclk_2, output_unavailable, outclk_0}),
 		.locked	(locked),
 		.fboutclk	( ),
 		.fbclk	(1'b0),
