@@ -39,6 +39,7 @@ ARCHITECTURE a OF ExternalMemory IS
 	SIGNAL address : STD_LOGIC_VECTOR(15 DOWNTO 0);
 	SIGNAL data_in : STD_LOGIC_VECTOR(15 DOWNTO 0);
 	SIGNAL data_out : STD_LOGIC_VECTOR(15 DOWNTO 0);
+  SIGNAL inter_out : STD_LOGIC_VECTOR(15 DOWNTO 0);
 	SIGNAL err : STD_LOGIC_VECTOR(15 DOWNTO 0);
 	SIGNAL config : STD_LOGIC_VECTOR(15 DOWNTO 0);
 	SIGNAL wren : STD_LOGIC;
@@ -49,7 +50,9 @@ ARCHITECTURE a OF ExternalMemory IS
 	SIGNAL read_inc_en : STD_LOGIC;
 	SIGNAL write_inc_dir : STD_LOGIC;
 	SIGNAL read_inc_dir : STD_LOGIC;
+  SIGNAL byte_en : STD_LOGIC_VECTOR(1 DOWNTO 0);
 	SIGNAL inc_val : STD_LOGIC_VECTOR(15 DOWNTO 0);
+  SIGNAL inc_val_shifted : STD_LOGIC_VECTOR(15 DOWNTO 0);
 
 	TYPE state_type IS (
 		idle,
@@ -81,7 +84,7 @@ BEGIN
 		address_a => address,
 		data_a => data_in,
 		wren_a => wren,
-		q_a => data_out
+		q_a => inter_out
 	);
 
 	-- use altsyncram component for bounds
@@ -152,10 +155,17 @@ BEGIN
 
 	inc_val(2 DOWNTO 0) <= config(2 DOWNTO 0);
 	inc_val(15 DOWNTO 3) <= (OTHERS => '0');
+  inc_val_shifted <= '0' & inc_val(15 DOWNTO 1);
 	write_inc_en <= config(6);
 	read_inc_en <= config(5);
 	write_inc_dir <= config(4);
 	read_inc_dir <= config(3);
+  byte_en(1 DOWNTO 0) <= config(8 DOWNTO 7);
+
+	 WITH byte_en SELECT data_out <=
+		"00000000" & inter_out(7 DOWNTO 0) WHEN "01",
+		"00000000" & inter_out(15 DOWNTO 8) WHEN "10",
+		inter_out WHEN OTHERS;
 
 	PROCESS (CLOCK, RESETN)
 	BEGIN
@@ -225,8 +235,20 @@ BEGIN
 			END IF;
 			IF id_b = X"0000" OR bound_out_b = X"0000" OR (address < bound_out_b AND bound_out_a <= address) THEN
 				IF EXTMEMDATA_EN = '1' AND state = idle THEN
-					data_in <= IO_DATA;
-					wren <= '1';
+          IF byte_en = "01" THEN
+            data_in(7 DOWNTO 0) <= IO_DATA(7 DOWNTO 0);
+          ELSIF byte_en = "10" THEN
+            data_in(15 DOWNTO 8) <= IO_DATA(7 DOWNTO 0); 
+          ELSE
+            data_in <= IO_DATA;                   
+          END IF;
+          
+          IF IO_WRITE = '1' THEN
+					  wren <= '1';
+					ELSE
+				    wren <= '0';
+					END IF;
+
 					err <= X"0000";
 
 					IF write_inc_en = '1' AND IO_WRITE = '1' THEN
@@ -264,31 +286,80 @@ BEGIN
 				state <= stop;
 			END IF;
 
+
 			IF state = incrementing AND EXTMEMDATA_EN = '0' THEN
 				state <= stop;
-				address <= address + inc_val;
-				IF inc_val > (X"FFFF" - address) THEN
-					err <= X"0001";
-				END IF;
+				CASE byte_en IS
+					WHEN "01" =>
+						IF inc_val(0) = '1' THEN
+							config(8 DOWNTO 7) <= "10";
+						END IF;
+						address <= address + inc_val_shifted;
+						IF inc_val_shifted > (X"FFFF" - address) THEN
+							err <= X"0001";
+						END IF;
+					WHEN "10" =>
+						IF inc_val(0) = '1' THEN
+							config(8 DOWNTO 7) <= "01";
+							address <= address + inc_val_shifted + 1;
+							IF inc_val_shifted + 1 > (X"FFFF" - address) THEN
+								err <= X"0001";
+							END IF;
+						ELSE
+							address <= address + inc_val_shifted;
+							IF inc_val_shifted > (X"FFFF" - address) THEN
+								err <= X"0001";
+							END IF;
+						END IF;
+					WHEN OTHERS =>
+						address <= address + inc_val;
+						IF inc_val > (X"FFFF" - address) THEN
+							err <= X"0001";
+						END IF;
+				END CASE;
 			END IF;
-
+				
 			IF state = decrementing AND EXTMEMDATA_EN = '0' THEN
 				state <= stop;
-				address <= address - inc_val;
-				IF inc_val > address THEN
-					err <= X"FFFF";
-				END IF;
+				CASE byte_en IS
+					WHEN "01" =>
+						IF inc_val(0) = '1' THEN
+							config(8 DOWNTO 7) <= "10";
+							address <= address - inc_val_shifted - 1;
+							IF inc_val_shifted + 1 > address THEN
+								err <= X"FFFF";
+							END IF;
+						ELSE
+							address <= address - inc_val_shifted;
+							IF inc_val_shifted > address THEN
+								err <= X"FFFF";
+							END IF;
+						END IF;
+					WHEN "10" =>
+						IF inc_val(0) = '1' THEN
+							config(8 DOWNTO 7) <= "01";
+						END IF;
+						address <= address - inc_val_shifted;
+						IF inc_val_shifted > address THEN
+							err <= X"FFFF";
+						END IF;
+					WHEN OTHERS =>
+						address <= address - inc_val;
+						IF inc_val > address THEN
+							err <= X"FFFF";
+						END IF;
+				END CASE;
 			END IF;
-			IF EXTMEMADDR_EN = '0' AND
-				EXTMEMID_EN = '0' AND
-				EXTMEMBOUNDS_EN = '0' AND
-				EXTMEMDATA_EN = '0' AND
-				EXTMEMCONFIG_EN = '0' AND
-				EXTMEMERR_EN = '0' AND
-				state = stop THEN
-				state <= idle;
-			END IF;
-		END IF;
-	END PROCESS;
 
+		  IF EXTMEMADDR_EN = '0' AND
+			  EXTMEMID_EN = '0' AND
+			  EXTMEMBOUNDS_EN = '0' AND
+			  EXTMEMDATA_EN = '0' AND
+			  EXTMEMCONFIG_EN = '0' AND
+			  EXTMEMERR_EN = '0' AND
+			  state = stop THEN
+			  state <= idle;
+		  END IF;
+	  END IF;
+  END PROCESS;
 END a;
