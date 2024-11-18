@@ -24,7 +24,13 @@ ENTITY ExternalMemory IS
 		EXTMEMID_EN,
 		EXTMEMBOUNDS_EN,
 		IO_WRITE : IN STD_LOGIC;
-		IO_DATA : INOUT STD_LOGIC_VECTOR(15 DOWNTO 0)
+		IO_DATA : INOUT STD_LOGIC_VECTOR(15 DOWNTO 0);
+		ERR_OUT : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
+		BOUND_B : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
+		BOUND_A : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
+		ID_A_OUT: OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
+		ID_B_OUT: OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
+		STATE_OUT: OUT STD_LOGIC_VECTOR(2 DOWNTO 0)
 	);
 END ExternalMemory;
 
@@ -56,9 +62,10 @@ ARCHITECTURE a OF ExternalMemory IS
 
 	TYPE state_type IS (
 		idle,
+		idle1,
+		check,
 		incrementing,
 		decrementing,
-		check,
 		stop
 	);
 	SIGNAL state : state_type;
@@ -196,6 +203,8 @@ BEGIN
 					err <= X"0002";
 				ELSE
 					id <= IO_DATA;
+					id_a <= IO_DATA;
+					id_b <= IO_DATA + 1;
 				END IF;
 				state <= stop;
 			END IF;
@@ -203,50 +212,49 @@ BEGIN
 			IF EXTMEMBOUNDS_EN = '1' AND IO_WRITE = '1' THEN
 				IF state = idle THEN
 					id_a <= id;
-					state <= check;
+					state <= idle1;
 
 					IF id = X"FFFE" THEN
 						id_b <= id + 1;
 					ELSE
 						id_b <= id + 2;
 					END IF;
+				ELSIF state = idle1 THEN
+					state <= check;
+				ELSIF state = check THEN
+					IF (bound_out_a <= IO_DATA) AND (NOT (bound_out_a = X"0000") OR id_a = X"0000") AND (bound_out_b >= IO_DATA OR bound_out_b = X"0000") THEN
+						state <= stop;
+						id_a <= id;
+						id_b <= id + 1;
+						wren_bound_b <= '1';
 
-				ELSIF state = check
-					AND (bound_out_a <= IO_DATA)
-					AND (NOT (bound_out_a = X"0000") OR id_a = X"0000")
-					AND (bound_out_b >= IO_DATA OR bound_out_b = X"0000") THEN
-					state <= stop;
-					id_a <= id;
-					id_b <= id + 1;
-					wren_bound_a <= '0';
-					wren_bound_b <= '1';
-					err <= X"0000";
-
-					IF IO_DATA = X"0000" THEN
-						bound_in_b <= bound_in_a;
+						IF IO_DATA = X"0000" THEN
+							bound_in_b <= bound_in_a;
+						ELSE
+							bound_in_b <= IO_DATA;
+						END IF;
 					ELSE
-						bound_in_b <= IO_DATA;
+						err <= X"0002";
 					END IF;
-
-				ELSE
-					err <= X"0002";
 					state <= stop;
+				ELSE
+					wren_bound_b <= '0';
 				END IF;
 			END IF;
-			IF id_b = X"0000" OR bound_out_b = X"0000" OR (address < bound_out_b AND bound_out_a <= address) THEN
-				IF EXTMEMDATA_EN = '1' AND state = idle THEN
-          IF byte_en = "01" THEN
-            data_in(7 DOWNTO 0) <= IO_DATA(7 DOWNTO 0);
-          ELSIF byte_en = "10" THEN
-            data_in(15 DOWNTO 8) <= IO_DATA(7 DOWNTO 0); 
-          ELSE
-            data_in <= IO_DATA;                   
-          END IF;
-          
-          IF IO_WRITE = '1' THEN
-					  wren <= '1';
+			IF EXTMEMDATA_EN = '1' AND state = idle THEN
+				IF id_b = X"0000" OR bound_out_b = X"0000" OR (address < bound_out_b AND bound_out_a <= address) THEN
+					IF byte_en = "01" THEN
+						data_in(7 DOWNTO 0) <= IO_DATA(7 DOWNTO 0);
+					ELSIF byte_en = "10" THEN
+						data_in(15 DOWNTO 8) <= IO_DATA(7 DOWNTO 0); 
 					ELSE
-				    wren <= '0';
+						data_in <= IO_DATA;                   
+					END IF;
+          
+					IF IO_WRITE = '1' THEN
+						wren <= '1';
+					ELSE
+						wren <= '0';
 					END IF;
 
 					err <= X"0000";
@@ -265,15 +273,15 @@ BEGIN
 							state <= incrementing;
 						END IF;
 					ELSE
-						state <= stop;
+							state <= stop;
 					END IF;
 				ELSE
+					err <= X"0003";
 					wren <= '0';
+					state <= stop;
 				END IF;
 			ELSE
-				err <= X"0003";
 				wren <= '0';
-				state <= stop;
 			END IF;
 
 			IF EXTMEMCONFIG_EN = '1' AND IO_WRITE = '1' AND state = idle THEN
@@ -362,4 +370,16 @@ BEGIN
 		  END IF;
 	  END IF;
   END PROCESS;
+ERR_OUT <= err;
+BOUND_A <= bound_out_a;
+BOUND_B <= bound_out_b;
+ID_A_OUT <= id_a;
+ID_B_OUT <= id_b;
+WITH state SELECT STATE_OUT <=
+	"000" WHEN idle,
+	"001" WHEN idle1,
+	"010" WHEN check,
+	"011" WHEN incrementing,
+	"100" WHEN decrementing,
+	"101" WHEN stop;
 END a;

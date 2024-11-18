@@ -1,0 +1,44 @@
+WIDTH=16;
+DEPTH=2048;
+
+ADDRESS_RADIX=HEX;
+DATA_RADIX=HEX;
+
+CONTENT BEGIN
+0000: B800; -- 	LOADI 0
+0001: 9874; --     OUT MemID ;set current id to 0
+0002: BBE8; --     LOADI 1000
+0003: 9875; --     OUT MemBounds ;set bounds for id 0, from 0 to 1000
+0004: B9F4; --     LOADI 500
+0005: 9870; --     OUT MemAddr 
+0006: B855; --     LOADI &H55
+0007: 9871; --     OUT MemData ;;put 0x55 in mem addr 500
+0008: 9071; -- 	IN MemData
+0009: 9804; -- 	OUT Hex0
+000A: 9073; -- 	In MemErr
+000B: 9804; -- 	OUT Hex0
+000C: B801; --     LOADI 1
+000D: 9874; --     OUT MemID ;;set id to 1
+000E: 0822; --     LOAD FIVEK
+000F: 9875; --     OUT MemBounds ;;set bounds for id 1 to be from 1000 to 0x5000
+0010: 9073; -- 	In MemErr
+0011: 9804; -- 	OUT Hex0
+0012: 0822; -- 	LOAD FIVEK
+0013: 9871; --     OUT MemData
+0014: 9073; -- 	IN MemErr
+0015: 9804; --     OUT Hex0
+0016: B800; -- 	LOADI 0
+0017: 9874; --     OUT MemID ;set current id to 0
+0018: 9071; -- 	IN MemData
+0019: 9804; --     OUT Hex0
+001A: B901; -- 	LOADI &H101
+001B: 9804; -- 	OUT Hex0
+001C: 2800; -- 	JUMP Beginning
+001D: 9802; -- 	OUT    Timer
+001E: 9002; -- 	IN     Timer
+001F: 6FF6; -- 	ADDI   -10
+0020: 301E; -- 	JNEG   WaitingLoop
+0021: 8800; -- 	RETURN
+0022: 5000; -- FIVEK:     DW &H5000
+[0023..07FF] : 0000; -- [empty memory]
+END;
