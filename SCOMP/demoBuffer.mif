@@ -5,10 +5,10 @@ ADDRESS_RADIX=HEX;
 DATA_RADIX=HEX;
 
 CONTENT BEGIN
-0000: 280E; -- JUMP Start
+0000: 2810; -- JUMP Start
 0001: FEED; -- Feed:        DW &amp;HFEED
 0002: DEAD; -- Dead:        DW &amp;HDEAD
-0003: 000A; -- CountInVal:  DW 10
+0003: 0005; -- CountInVal:  DW 5
 0004: 0014; -- DurationCount: DW 20
 0005: 0014; -- ReplayCount:   DW 20
 0006: 0000; -- Temp:        DW 0
@@ -19,57 +19,103 @@ CONTENT BEGIN
 000B: 0020; -- ReadIncEn:   DW &amp;B100000
 000C: 0000; -- WriteIncDir: DW &amp;B00000 ; positive increment
 000D: 0000; -- ReadIncDir:  DW &amp;B0000  ; positive increment
-000E: B801; -- 	LOADI 1 ; increment amount
-000F: 500A; --     OR WriteIncEn
-0010: 500B; --     OR ReadIncEn
-0011: 500C; --     OR WriteIncDir
-0012: 500D; --     OR ReadIncDir
-0013: 9872; --     OUT Config
-0014: 0807; --     LOAD ID_SignalOne
-0015: 9874; --     OUT ID
-0016: 0809; --     LOAD HighBoundOne
-0017: 9875; --     OUT Bounds
-0018: 0808; --     LOAD LowBoundOne
-0019: 9870; --     OUT Address
-001A: 803C; --     CALL Delay
-001B: 0803; -- 	LOAD CountInVal
-001C: 9805; --     OUT Hex1
-001D: 6FFF; --     ADDI -1
-001E: 1003; --     STORE CountInVal
-001F: 381A; --     JPOS CountDown
-0020: 0801; --     LOAD Feed
-0021: 9804; --     OUT Hex0
-0022: 0804; --     LOAD DurationCount
+000E: 0080; -- LowerByteSelect: DW &amp;B10000000
+000F: 0100; -- UpperByteSelect: DW &amp;B100000000
+0010: B801; -- 	LOADI 1 ; increment amount
+0011: 500A; --     OR WriteIncEn
+0012: 500B; --     OR ReadIncEn
+0013: 500C; --     OR WriteIncDir
+0014: 500D; --     OR ReadIncDir
+0015: 9872; --     OUT Config
+0016: 0807; --     LOAD ID_SignalOne
+0017: 9874; --     OUT ID
+0018: 0809; --     LOAD HighBoundOne
+0019: 9875; --     OUT Bounds
+001A: 0808; --     LOAD LowBoundOne
+001B: 9870; --     OUT Address
+001C: B805; --     LOADI 5
+001D: 1003; --     STORE CountInVal
+001E: B814; --     LOADI 20
+001F: 1004; --     STORE DurationCount
+0020: 1005; --     STORE ReplayCount
+0021: 805E; --     CALL Delay
+0022: 0803; -- 	LOAD CountInVal
 0023: 9805; --     OUT Hex1
 0024: 6FFF; --     ADDI -1
-0025: 1004; --     STORE DurationCount
-0026: 803C; --     CALL Delay
-0027: 9000; --     IN Switches
-0028: 9871; --     OUT Data
-0029: 0804; -- 	LOAD DurationCount
-002A: 3823; --     JPOS Collection
-002B: 0808; --     LOAD LowBoundOne
-002C: 9870; --     OUT Address
-002D: 803C; -- 	CALL Delay
-002E: 9071; --     IN Data
-002F: 9804; --     OUT Hex0
-0030: 0805; -- 	LOAD ReplayCount
-0031: 9805; --     OUT Hex1
-0032: 6FFF; --     ADDI -1
-0033: 1005; --     STORE ReplayCount
-0034: 382D; --     JPOS Replay
-0035: 0802; --     LOAD Dead
-0036: 9870; -- 	OUT Address
-0037: 9073; --     IN Error
-0038: 9804; --     OUT Hex0
-0039: B80E; --     LOADI &amp;HE
-003A: 9805; --     OUT Hex1
-003B: 283B; -- 	JUMP Forever
-003C: 9802; -- 	OUT    Timer
-003D: 9002; -- 	IN     Timer
-003E: 6FF6; -- 	ADDI   -10
-003F: 303D; -- 	JNEG   WaitingLoop
-0040: 8800; -- 	RETURN
-[0041..07FF] : 0000; -- [empty memory]
+0025: 1003; --     STORE CountInVal
+0026: 3821; --     JPOS CountDown
+0027: 0801; --     LOAD Feed
+0028: 9804; --     OUT Hex0
+0029: 0808; --     LOAD LowBoundOne
+002A: 9870; --     OUT Address
+002B: 0804; --     LOAD DurationCount
+002C: 9805; --     OUT Hex1
+002D: 6FFF; --     ADDI -1
+002E: 1004; --     STORE DurationCount
+002F: 805E; --     CALL Delay
+0030: 9000; --     IN Switches
+0031: 8063; --     CALL SeparateChannels
+0032: 9871; --     OUT Data
+0033: 0804; -- 	LOAD DurationCount
+0034: 382C; --     JPOS Collection
+0035: 0808; --     LOAD LowBoundOne
+0036: 9870; --     OUT Address
+0037: B814; --     LOADI 20
+0038: 1005; --     STORE ReplayCount
+0039: 805E; -- 	CALL Delay
+003A: B802; --     LOADI 2
+003B: 500B; --     OR ReadIncEn
+003C: 500E; --     OR LowerByteSelect
+003D: 9872; --     OUT Config
+003E: 9071; --     IN Data
+003F: 6900; --     ADDI &amp;H100
+0040: 9804; --     OUT Hex0
+0041: 0805; -- 	LOAD ReplayCount
+0042: 9805; --     OUT Hex1
+0043: 6FFF; --     ADDI -1
+0044: 1005; --     STORE ReplayCount
+0045: 3839; --     JPOS Replay1
+0046: 0808; --     LOAD LowBoundOne
+0047: 9870; --     OUT Address
+0048: B814; --     LOADI 20
+0049: 1005; --     STORE ReplayCount
+004A: 805E; -- 	CALL Delay
+004B: B802; --     LOADI 2
+004C: 500B; --     OR ReadIncEn
+004D: 500F; --     OR UpperByteSelect
+004E: 9872; --     OUT Config
+004F: 9071; --     IN Data
+0050: 6A00; --     ADDI &amp;H200
+0051: 9804; --     OUT Hex0
+0052: 0805; -- 	LOAD ReplayCount
+0053: 9805; --     OUT Hex1
+0054: 6FFF; --     ADDI -1
+0055: 1005; --     STORE ReplayCount
+0056: 384A; --     JPOS Replay2
+0057: 0802; --     LOAD Dead
+0058: 9870; -- 	OUT Address
+0059: 9073; --     IN Error
+005A: 9804; --     OUT Hex0
+005B: B80E; --     LOADI &amp;HE
+005C: 9805; --     OUT Hex1
+005D: 285D; -- 	JUMP Forever
+005E: 9802; -- 	OUT    Timer
+005F: 9002; -- 	IN     Timer
+0060: 6FF6; -- 	ADDI   -10
+0061: 305F; -- 	JNEG   WaitingLoop
+0062: 8800; -- 	RETURN
+0063: 106D; --     STORE SCVal
+0064: 486B; --     AND SCLowerMask
+0065: 106E; --     STORE SCRes
+0066: 086D; --     LOAD SCVal
+0067: 486C; --     AND SCUpperMask
+0068: 6004; --     SHIFT 4
+0069: 506E; --     OR SCRes
+006A: 8800; --     RETURN
+006B: 000F; -- SCLowerMask: DW &amp;HF
+006C: 00F0; -- SCUpperMask: DW &amp;HF0
+006D: 0000; -- SCVal: DW 0
+006E: 0000; -- SCRes: DW 0
+[006F..07FF] : 0000; -- [empty memory]
 END;
 
