@@ -203,8 +203,8 @@ BEGIN
 					err <= X"0002";
 				ELSE
 					id <= IO_DATA;
-					id_a <= id;
-					id_b <= id + 1;
+					id_a <= IO_DATA;
+					id_b <= IO_DATA + 1;
 				END IF;
 				state <= stop;
 			END IF;
