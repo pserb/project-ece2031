@@ -1,0 +1,75 @@
+WIDTH=16;
+DEPTH=2048;
+
+ADDRESS_RADIX=HEX;
+DATA_RADIX=HEX;
+
+CONTENT BEGIN
+0000: 280E; -- JUMP Start
+0001: FEED; -- Feed:        DW &amp;HFEED
+0002: DEAD; -- Dead:        DW &amp;HDEAD
+0003: 000A; -- CountInVal:  DW 10
+0004: 0014; -- DurationCount: DW 20
+0005: 0014; -- ReplayCount:   DW 20
+0006: 0000; -- Temp:        DW 0
+0007: 0000; -- ID_SignalOne:  DW 0
+0008: 0000; -- LowBoundOne:   DW 0
+0009: 0013; -- HighBoundOne:  DW 19
+000A: 0040; -- WriteIncEn:  DW &amp;B1000000
+000B: 0020; -- ReadIncEn:   DW &amp;B100000
+000C: 0000; -- WriteIncDir: DW &amp;B00000 ; positive increment
+000D: 0000; -- ReadIncDir:  DW &amp;B0000  ; positive increment
+000E: B801; -- 	LOADI 1 ; increment amount
+000F: 500A; --     OR WriteIncEn
+0010: 500B; --     OR ReadIncEn
+0011: 500C; --     OR WriteIncDir
+0012: 500D; --     OR ReadIncDir
+0013: 9872; --     OUT Config
+0014: 0807; --     LOAD ID_SignalOne
+0015: 9874; --     OUT ID
+0016: 0809; --     LOAD HighBoundOne
+0017: 9875; --     OUT Bounds
+0018: 0808; --     LOAD LowBoundOne
+0019: 9870; --     OUT Address
+001A: 803C; --     CALL Delay
+001B: 0803; -- 	LOAD CountInVal
+001C: 9805; --     OUT Hex1
+001D: 6FFF; --     ADDI -1
+001E: 1003; --     STORE CountInVal
+001F: 381A; --     JPOS CountDown
+0020: 0801; --     LOAD Feed
+0021: 9804; --     OUT Hex0
+0022: 0804; --     LOAD DurationCount
+0023: 9805; --     OUT Hex1
+0024: 6FFF; --     ADDI -1
+0025: 1004; --     STORE DurationCount
+0026: 803C; --     CALL Delay
+0027: 9000; --     IN Switches
+0028: 9871; --     OUT Data
+0029: 0804; -- 	LOAD DurationCount
+002A: 3823; --     JPOS Collection
+002B: 0808; --     LOAD LowBoundOne
+002C: 9870; --     OUT Address
+002D: 803C; -- 	CALL Delay
+002E: 9071; --     IN Data
+002F: 9804; --     OUT Hex0
+0030: 0805; -- 	LOAD ReplayCount
+0031: 9805; --     OUT Hex1
+0032: 6FFF; --     ADDI -1
+0033: 1005; --     STORE ReplayCount
+0034: 382D; --     JPOS Replay
+0035: 0802; --     LOAD Dead
+0036: 9870; -- 	OUT Address
+0037: 9073; --     IN Error
+0038: 9804; --     OUT Hex0
+0039: B80E; --     LOADI &amp;HE
+003A: 9805; --     OUT Hex1
+003B: 283B; -- 	JUMP Forever
+003C: 9802; -- 	OUT    Timer
+003D: 9002; -- 	IN     Timer
+003E: 6FF6; -- 	ADDI   -10
+003F: 303D; -- 	JNEG   WaitingLoop
+0040: 8800; -- 	RETURN
+[0041..07FF] : 0000; -- [empty memory]
+END;
+
