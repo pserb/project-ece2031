@@ -29,7 +29,8 @@ ENTITY ExternalMemory IS
 		BOUND_B : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
 		BOUND_A : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
 		ID_A_OUT: OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
-		ID_B_OUT: OUT STD_LOGIC_VECTOR(15 DOWNTO 0)
+		ID_B_OUT: OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
+		STATE_OUT: OUT STD_LOGIC_VECTOR(2 DOWNTO 0)
 	);
 END ExternalMemory;
 
@@ -217,9 +218,7 @@ BEGIN
 					END IF;
 
 				ELSIF state = check THEN
-					IF (bound_out_a <= IO_DATA)
-						AND (NOT (bound_out_a = X"0000") OR id_a = X"0000")
-						AND (bound_out_b >= IO_DATA OR bound_out_b = X"0000") THEN
+					IF (bound_out_a <= IO_DATA) AND (NOT (bound_out_a = X"0000") OR id_a = X"0000") AND (bound_out_b >= IO_DATA OR bound_out_b = X"0000") THEN
 						state <= stop;
 						id_a <= id;
 						id_b <= id + 1;
@@ -372,4 +371,10 @@ BOUND_A <= bound_out_a;
 BOUND_B <= bound_out_b;
 ID_A_OUT <= id_a;
 ID_B_OUT <= id_b;
+WITH state SELECT STATE_OUT <=
+	"000" WHEN idle,
+	"001" WHEN check,
+	"010" WHEN incrementing,
+	"011" WHEN decrementing,
+	"100" WHEN stop;
 END a;

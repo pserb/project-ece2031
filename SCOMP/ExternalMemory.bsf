@@ -123,6 +123,13 @@ https://fpgasoftware.intel.com/eula.
 		(line (pt 280 112)(pt 264 112)(line_width 3))
 	)
 	(port
+		(pt 280 128)
+		(output)
+		(text "STATE_OUT[2..0]" (rect 0 0 79 12)(font "Arial" ))
+		(text "STATE_OUT[2..0]" (rect 180 123 259 135)(font "Arial" ))
+		(line (pt 280 128)(pt 264 128)(line_width 3))
+	)
+	(port
 		(pt 280 32)
 		(bidir)
 		(text "IO_DATA[15..0]" (rect 0 0 68 12)(font "Arial" ))
