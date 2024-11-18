@@ -62,9 +62,10 @@ ARCHITECTURE a OF ExternalMemory IS
 
 	TYPE state_type IS (
 		idle,
+		idle1,
+		check,
 		incrementing,
 		decrementing,
-		check,
 		stop
 	);
 	SIGNAL state : state_type;
@@ -202,6 +203,8 @@ BEGIN
 					err <= X"0002";
 				ELSE
 					id <= IO_DATA;
+					id_a <= id;
+					id_b <= id + 1;
 				END IF;
 				state <= stop;
 			END IF;
@@ -209,14 +212,15 @@ BEGIN
 			IF EXTMEMBOUNDS_EN = '1' AND IO_WRITE = '1' THEN
 				IF state = idle THEN
 					id_a <= id;
-					state <= check;
+					state <= idle1;
 
 					IF id = X"FFFE" THEN
 						id_b <= id + 1;
 					ELSE
 						id_b <= id + 2;
 					END IF;
-
+				ELSIF state = idle1 THEN
+					state <= check;
 				ELSIF state = check THEN
 					IF (bound_out_a <= IO_DATA) AND (NOT (bound_out_a = X"0000") OR id_a = X"0000") AND (bound_out_b >= IO_DATA OR bound_out_b = X"0000") THEN
 						state <= stop;
@@ -373,8 +377,9 @@ ID_A_OUT <= id_a;
 ID_B_OUT <= id_b;
 WITH state SELECT STATE_OUT <=
 	"000" WHEN idle,
-	"001" WHEN check,
-	"010" WHEN incrementing,
-	"011" WHEN decrementing,
-	"100" WHEN stop;
+	"001" WHEN idle1,
+	"010" WHEN check,
+	"011" WHEN incrementing,
+	"100" WHEN decrementing,
+	"101" WHEN stop;
 END a;
