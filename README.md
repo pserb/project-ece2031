@@ -1,2 +1,2 @@
 # project-ece2031
-ece2031 project
+ECE 2031 Final Project - An external memory peripheral for SCOMP
